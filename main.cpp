@@ -65,54 +65,54 @@ void run_server(const int server_port) {
       exit(EXIT_FAILURE);
     }
 
-    //while (true) {
+    while (true) {
       value = recv(sock, server_buf, server_buf_size, 0);
       std::cout << "[Listener] value read from socket [" << value << "]: " << server_buf << std::endl;
       response = server_buf;
-
+  
       if (response.substr(0,1) == "$") {
         client_buf_size = std::stoi(response.substr(1));
         
-
+  
         std::string buffer_size_message = std::string(">") + std::to_string(server_buf_size) + " ";
         const char * size_message = buffer_size_message.c_str();
- 
-        std::cout << "[Client] Sending buffer size message to node: " << buffer_size_message << std::endl;
-
+   
+        std::cout << "[Listener] Sending buffer size message to node: " << buffer_size_message << std::endl;
+  
         send(sock, size_message, strlen(size_message), 0);
       }
-
+  
       if (response.substr(0,1) == "?") {
-        std::string requested = response.substr(1);
+        std::string requested = response.substr(1,1);
         std::string filename = "./" + requested;
         std::ifstream file(filename);
-
+  
         if (!file.good()) {
           std::cout << "[Listener] Requested block not found." << std::endl;       
           char * not_found_message = ">badblock";
           send(sock, not_found_message, strlen(not_found_message), 0);
           return;
         }
-  
+    
         std::string data = "";
         if (!file.is_open()) {
-          std::cout << "[Client] Error opening file." << std::endl;
+          std::cout << "[Listener] Error opening file." << std::endl;
         } else {
             std::string b = "";
           while (file >> b)
             data = data + b;
-
+  
           std::string block = std::string(">") + data;
           block = block.substr(0, client_buf_size);
-          std::cout << "[Client] Sending data:" << block << std::endl; 
+          std::cout << "[Listener] Sending data:" << block << std::endl; 
           send(sock, block.c_str(), strlen(block.c_str()), 0);
         }
-
+  
         file.close();
-
+  
       }
-
-    //}
+    }
+  
   }
 }
 
@@ -157,17 +157,21 @@ void run_client(const std::string & target_address, int target_port, const std::
   send(sock, size_message, strlen(size_message), 0);
 
   // Wait for response
-  read(sock, client_buf, client_buf_size);
+  recv(sock, client_buf, client_buf_size, 0);
   response = client_buf;
 
+  std::cout << "[Client] node reply: " << response << std::endl;
+
   // If not in reply format
-  if (response.substr(0,1) == ">")
+  if (response.substr(0,1) != ">") {
+    std::cout << "[Client] Invalid reply format. Exiting client thread..." << std::endl;
     return;
+  }
 
   // Reply will contain server buffer size, strip relevant part
   server_buf_size = std::stoi(response.substr(1));
 
-
+  std::cout << target_block << std::endl;
   std::string block_request_message = std::string("?") + target_block + " ";
   std::cout << "[Client] Sending block request message to node(" << target_address << ", " 
             << target_port << "): " << block_request_message << std::endl;
@@ -177,11 +181,15 @@ void run_client(const std::string & target_address, int target_port, const std::
   read(sock, client_buf, client_buf_size);
   response = client_buf;
 
-  if (response.substr(0,1) == ">")
+  if (response.substr(0,1) != ">") {
+    std::cout << "[Client] Invalid reply format. Exiting client thread..." << std::endl;
     return;
+  }
 
   std::cout << "[Client] Block received: " << response.substr(1) << std::endl;
 
+
+  std::cout << "[Client] Done, exiting..." << std::endl;
   return;
 }
 
