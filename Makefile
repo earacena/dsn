@@ -1,4 +1,4 @@
-OBJS = main.cpp Packet.cpp Protocol.cpp Server.cpp Client.cpp Logger.cpp
+OBJS = main.cpp 
 FLAGS = -g -Wall -pedantic -pthread
 EXEC = node
 #LIBS = 
@@ -7,5 +7,4 @@ EXEC = node
 all:
 	g++ $(OBJS) -o $(EXEC) $(FLAGS) 
 
-clear:
-	rm logs/*
+
