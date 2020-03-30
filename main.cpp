@@ -83,7 +83,8 @@ void run_server(const int server_port) {
       }
   
       if (response.substr(0,1) == "?") {
-        std::string requested = response.substr(1,1);
+        std::string requested = response.substr(1, response.find(' ')-1);
+        std::cout << "[Listener] Requested block name/hash: " << requested << std::endl;
         std::string filename = "./" + requested;
         std::ifstream file(filename);
   
