@@ -7,7 +7,7 @@ mkdir node1;
 mkdir node2;
 echo "This is " > 1;
 echo "a test " > 2;
-echo "message for" > 3;
+echo "message for (inserting very long statement to test chunking)" > 3;
 echo "a dsn project." > 4;
 mv 1 ./node1;
 mv 2 ./node1;

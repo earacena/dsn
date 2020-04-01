@@ -5,6 +5,7 @@
 #include <thread>
 #include <fstream>
 #include <string>
+#include <vector>
 
 // libraries for server-side
 #include <unistd.h>
@@ -16,6 +17,39 @@
 
 // libraries for client-side, including some above
 #include <arpa/inet.h>
+
+
+
+bool valid_reply_form(const std::string & response) {
+  // >..._
+  std::cout << "first: " << response.substr(0,1) << "." << std::endl;
+  std::cout << "second:" << response.substr(response.length()-1, 1) << "." << std::endl;
+  return (response.substr(0,1) == ">" && response.substr(response.length()-1, 1) == "_");
+}
+
+bool valid_transmit_form(const std::string & response) {
+  // One of three choices representing a stage
+  // >...&    first block in transmission
+  // &...&    second block and onwards in transmission
+  // &..._    last block in transmission
+  // transmit form must satisfy one of these
+
+  if (response == ">badblock_")
+    return false;
+
+  std::cout << "[Client] first: " << response.substr(0, 1) << "." << std::endl;
+  std::cout << "[Client] second: " << response.substr(response.length()-1, 1) << "." << std::endl;
+
+  bool one_chunk = (response.substr(0,1) == ">" && response.substr(response.size()-1, 1) == "_");
+  bool first_chunk = (response.substr(0,1) == ">" && response.substr(response.size()-1, 1) == "&");
+  bool chunk_n = (response.substr(0,1) == "&" && response.substr(response.size()-1, 1) == "&");
+  bool last_chunk = (response.substr(0,1) == "&" && response.substr(response.size()-1, 1) == "_");
+
+  std::cout << "[Client] transmit form [" << response << "]: " 
+            << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good" : "bad") << std::endl;
+
+  return (one_chunk || first_chunk || chunk_n || last_chunk);
+}
 
 void run_server(const int server_port) {
   int server_fd, sock, value;
@@ -66,15 +100,20 @@ void run_server(const int server_port) {
     }
 
     while (true) {
+      // clear buffer before every use
+      for (char & ch : server_buf)
+        ch = 0;
+ 
       value = recv(sock, server_buf, server_buf_size, 0);
       std::cout << "[Listener] value read from socket [" << value << "]: " << server_buf << std::endl;
       response = server_buf;
-  
+      response = response.substr(0, value);
+
       if (response.substr(0,1) == "$") {
-        client_buf_size = std::stoi(response.substr(1));
+        client_buf_size = std::stoi(response.substr(1, response.find('_')-1));
         
   
-        std::string buffer_size_message = std::string(">") + std::to_string(server_buf_size) + " ";
+        std::string buffer_size_message = std::string(">") + std::to_string(server_buf_size) + "_";
         const char * size_message = buffer_size_message.c_str();
    
         std::cout << "[Listener] Sending buffer size message to node: " << buffer_size_message << std::endl;
@@ -83,14 +122,14 @@ void run_server(const int server_port) {
       }
   
       if (response.substr(0,1) == "?") {
-        std::string requested = response.substr(1, response.find(' ')-1);
+        std::string requested = response.substr(1, response.find('_')-1);
         std::cout << "[Listener] Requested block name/hash: " << requested << std::endl;
         std::string filename = "./" + requested;
         std::ifstream file(filename);
   
         if (!file.good()) {
           std::cout << "[Listener] Requested block not found." << std::endl;       
-          char * not_found_message = ">badblock";
+          char * not_found_message = ">badblock_";
           send(sock, not_found_message, strlen(not_found_message), 0);
           return;
         }
@@ -103,10 +142,45 @@ void run_server(const int server_port) {
           while (file >> b)
             data = data + b;
   
-          std::string block = std::string(">") + data;
-          block = block.substr(0, client_buf_size);
-          std::cout << "[Listener] Sending data:" << block << std::endl; 
-          send(sock, block.c_str(), strlen(block.c_str()), 0);
+          if (data.length()+1 > client_buf_size) {
+            // Split block into chunks of client buffer size (minus two for the >..._ reply form and 
+            // terminating underscore)
+            std::vector<std::string> chunks;
+            chunks.reserve(data.size()/client_buf_size-2);
+            int chunk_size = client_buf_size-2;
+            for (int i = 0; i < data.length(); i += chunk_size) {
+              chunks.push_back(data.substr(i, chunk_size));
+            }
+
+
+            // Transmission
+            // Conform to reply format
+            for (int i = 0; i < chunks.size(); ++i) {
+              if (i == 0)
+                chunks[0] = std::string(">") + chunks[0] + "&";
+              // last element
+              else if (i == chunks.size()-1)
+                chunks[i] = std::string("&") + chunks[i] + "_";
+              else
+                chunks[i] = std::string("&") + chunks[i] + "&";
+            }
+            // for debug
+            std::cout << "Data: " << data << std::endl;
+            for (std::string & chunk : chunks)
+              std::cout << "Chunk: " << chunk << std::endl;
+
+            // send
+            for (std::string & chunk : chunks) {
+              send(sock, chunk.c_str(), strlen(chunk.c_str()), 0);
+            }
+
+          } else {
+            // Send message in single transmission
+            std::string block = std::string(">") + data + "_";
+            block = block.substr(0, client_buf_size);
+            std::cout << "[Listener] Sending data:" << block << std::endl; 
+            send(sock, block.c_str(), strlen(block.c_str()), 0);
+          }
         }
   
         file.close();
@@ -124,7 +198,7 @@ void run_client(const std::string & target_address, int target_port, const std::
 
   struct sockaddr_in serv_addr;
 
-  const int client_buf_size = 100;
+  const int client_buf_size = 10;
   char client_buf[client_buf_size] = {0};
 
   int server_buf_size = 100;
@@ -149,7 +223,7 @@ void run_client(const std::string & target_address, int target_port, const std::
   }
 
   // Prepare messages to send to target node
-  std::string buffer_size_message = std::string("$") + std::to_string(client_buf_size) + " ";
+  std::string buffer_size_message = std::string("$") + std::to_string(client_buf_size) + "_";
   const char * size_message = buffer_size_message.c_str();
  
   std::cout << "[Client] Sending buffer size message to node(" << target_address << ", " 
@@ -158,36 +232,74 @@ void run_client(const std::string & target_address, int target_port, const std::
   send(sock, size_message, strlen(size_message), 0);
 
   // Wait for response
-  recv(sock, client_buf, client_buf_size, 0);
+  int msg_size = 0;
+  for (char & ch : client_buf)
+    ch = 0;
+
+  msg_size = recv(sock, client_buf, client_buf_size, 0);
   response = client_buf;
+  response = response.substr(0, msg_size);
 
   std::cout << "[Client] node reply: " << response << std::endl;
 
   // If not in reply format
-  if (response.substr(0,1) != ">") {
+  if (!valid_reply_form(response)) {
     std::cout << "[Client] Invalid reply format. Exiting client thread..." << std::endl;
     return;
   }
 
   // Reply will contain server buffer size, strip relevant part
-  server_buf_size = std::stoi(response.substr(1));
+  server_buf_size = std::stoi(response.substr(1, response.find('_')-1));
 
   std::cout << target_block << std::endl;
-  std::string block_request_message = std::string("?") + target_block + " ";
+  std::string block_request_message = std::string("?") + target_block + "_";
   std::cout << "[Client] Sending block request message to node(" << target_address << ", " 
             << target_port << "): " << block_request_message << std::endl;
   const char * request_message = block_request_message.c_str();
   send(sock, request_message, strlen(request_message), 0);
 
-  read(sock, client_buf, client_buf_size);
-  response = client_buf;
 
-  if (response.substr(0,1) != ">") {
+  
+  for (char & ch : client_buf)
+    ch = 0;
+  msg_size = recv(sock, client_buf, client_buf_size, 0);
+  response = client_buf;
+  response = response.substr(0, msg_size);  
+
+  std::cout << "[Client] Message received: " << response << std::endl;
+
+  if (!valid_transmit_form(response)) {
     std::cout << "[Client] Invalid reply format. Exiting client thread..." << std::endl;
     return;
   }
 
-  std::cout << "[Client] Block received: " << response.substr(1) << std::endl;
+  std::vector<std::string> chunks;
+  chunks.reserve(15);
+
+  chunks.push_back(response);
+
+  while ((response.substr(0,1) == "&" || response.substr(response.length()-1, 1) == "&") && 
+         (response.substr(response.length()-1, 1) != "_")) {
+    for (char & ch : client_buf)
+      ch = 0;
+    msg_size = recv(sock, client_buf, client_buf_size, 0);
+    response = client_buf;
+    response = response.substr(0, msg_size);
+
+    std::cout << "[Client] Chunk received: " << response << std::endl;
+    chunks.push_back(response);
+  }
+
+  // process chunks, extract data
+  for (std::string & chunk : chunks)
+    chunk = chunk.substr(1, chunk.length()-2);
+
+  std::string data = "";
+
+  for (std::string & chunk : chunks)
+    data = data + chunk;
+
+  std::cout << "[Client] Block received: " << data << std::endl;
 
 
   std::cout << "[Client] Done, exiting..." << std::endl;
