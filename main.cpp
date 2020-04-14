@@ -20,6 +20,9 @@
 
 
 
+//---------------
+// Helpers
+//---------------
 bool valid_reply_form(const std::string & response) {
   // >..._
   std::cout << "first: " << response.substr(0,1) << "." << std::endl;
@@ -51,7 +54,12 @@ bool valid_transmit_form(const std::string & response) {
   return (one_chunk || first_chunk || chunk_n || last_chunk);
 }
 
+
+
+
 void run_server(const int server_port) {
+  std::cout << "[Listener] Running server, listening for requests..." << std::endl;
+
   int server_fd, sock, value;
   struct sockaddr_in address;
   int opt = 1;
@@ -105,6 +113,11 @@ void run_server(const int server_port) {
         ch = 0;
  
       value = recv(sock, server_buf, server_buf_size, 0);
+      if (value == 0) {
+        std::cout << "[Listener] remote host terminated connection. Exiting..." << std::endl;
+        exit(0);
+      }
+
       std::cout << "[Listener] value read from socket [" << value << "]: " << server_buf << std::endl;
       response = server_buf;
       response = response.substr(0, value);
@@ -125,7 +138,7 @@ void run_server(const int server_port) {
         std::string requested = response.substr(1, response.find('_')-1);
         std::cout << "[Listener] Requested block name/hash: " << requested << std::endl;
         std::string filename = "./" + requested;
-        std::ifstream file(filename);
+        std::ifstream file(filename, std::ios::binary);
   
         if (!file.good()) {
           std::cout << "[Listener] Requested block not found." << std::endl;       
@@ -138,9 +151,11 @@ void run_server(const int server_port) {
         if (!file.is_open()) {
           std::cout << "[Listener] Error opening file." << std::endl;
         } else {
-            std::string b = "";
-          while (file >> b)
-            data = data + b;
+          std::string current = "";
+          std::string data = "";
+          // Do not ignore whitespace
+          while (std::getline(file, current))
+           data  = data + current + '\n';
   
           if (data.length()+1 > client_buf_size) {
             // Split block into chunks of client buffer size (minus two for the >..._ reply form and 
