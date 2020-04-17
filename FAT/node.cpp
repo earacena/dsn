@@ -4,8 +4,8 @@
 #include <iostream>		//couts
 #include <vector>		//data storage
 #include <map>			//maps
-#include "block.cpp"	//block data
 #include "fat.cpp"		//fat
+#include "block.cpp"		//block data
 
 class Node{
 	public:
@@ -24,8 +24,7 @@ class Node{
 };	
 
 Node::Node(std::string userInput, int nodeNumber) {
-	Block block(userInput);
-	this->block = block;
+	this->block.setData(userInput);
 	this->nodeNumber = nodeNumber;
 }
 
@@ -85,7 +84,7 @@ int Node::getNodeNumber() {
 }
 
 void Node::setNodeNumber(int nodeNumber) {
-	this.nodeNumber = nodeNumber;
+	this->nodeNumber = nodeNumber;
 }
 
 /*Block Node::getBlock() {

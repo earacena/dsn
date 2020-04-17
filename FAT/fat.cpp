@@ -3,18 +3,18 @@
 
 #include <iostream>		//counts
 #include <vector>		//data storage
-#include "block.cpp"	//block data
 #include "node.cpp"	//nodes
+#include "block.cpp"	//block data
 
 class Fat{
 	public:
 		std::vector<std::string>& getNodes();
-		void setNodes(const std::vector<Node>& vector);
+		void setNodes(std::vector<Node> vector);
 		std::string getFileName();
 		void setFileName(std::string fileName);
 	private:
 		//std::vector<node*> nodeVec;	//fat holds nodes
-		std::vector<Node>* nodes;
+		std::vector<Node> nodes;
 		std::string fileName;
 };	
 
@@ -22,8 +22,8 @@ std::vector<std::string>& Fat::getNodes() {
 	return nodes;
 }
 
-void Fat::setNodes(const std::vector<Node>& vecToPopulate) { //pass in reference to make it faster, const so it doesnt get modified.
-	this->nodes = vecToPopulate;
+void Fat::setNodes(std::vector<Node> vector) { //pass in reference to make it faster, const so it doesnt get modified.
+	this->nodes = vector;
 }
 
 std::string Fat::getFileName() {

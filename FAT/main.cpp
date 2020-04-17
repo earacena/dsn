@@ -31,8 +31,8 @@ int main (int argc, char *argv[]){
 					std::cin >> numFiles;*/
 					userInput = "Hello there, i am a very long string";
 					numFiles = 3;
-					//nodes = new vector<Node>();
-
+					//Node node;
+					//node.Node::createFat(nodes, userInput, numFiles);	//creates nodes and puts it into nodes vector
 					Node::createFat(nodes, userInput, numFiles);	//creates nodes and puts it into nodes vector
 					fatIsSetUp = true;
 				}
