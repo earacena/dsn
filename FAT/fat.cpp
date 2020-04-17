@@ -8,7 +8,7 @@
 
 class Fat{
 	public:
-		std::vector<std::string>& getNodes();
+		std::vector<Node>& getNodes();
 		void setNodes(std::vector<Node> vector);
 		std::string getFileName();
 		void setFileName(std::string fileName);
@@ -18,7 +18,7 @@ class Fat{
 		std::string fileName;
 };	
 
-std::vector<std::string>& Fat::getNodes() {	
+std::vector<Node>& Fat::getNodes() {	
 	return nodes;
 }
 
