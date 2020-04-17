@@ -5,24 +5,25 @@
 
 int main (int argc, char *argv[]){
 	std::string userInput;
+	int userChoice;
 	int numFiles;
 	bool fatIsSetUp = false;
-	std::vector<Node> *nodes;
+	std::vector<Node> nodes;
 
 	while (true) 
 	{
 		std::cout << "Enter s to set up Fat, c to create new file" << std::endl;
-		std::cin >> userInput;
+		std::cin >> userChoice;
 
-		switch (userInput) 
+		switch (userChoice) 
 		{
-			/*case 'c':
+			/*case 2:
 				std::cout << "Enter what to put into the file" << std::endl;
 				std::cin >> userInput;
 				std::string tempString = "This is my plain text that wil' be split up";
 				//Fat::fat(userInput, numSplit);
 				break;*/
-			case 's':	//set up fat once.
+			case 1:	//set up fat once.
 				if (fatIsSetUp == false) {
 					/*std::cout << "Enter input to store" << std::endl;
 					std::cin >> userInput;

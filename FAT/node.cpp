@@ -9,10 +9,12 @@
 
 class Node{
 	public:
-		Node(std::string userInput, int nodeNumber)
+		Node(std::string userInput, int nodeNumber);
 
 		void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces);	//split string into vector 
-		void createFat(std::vector<node> &nodes, std::string userInput, int numFiles);	//create nodes
+		void createFat(std::vector<Node> &nodes, std::string userInput, int numFiles);	//create nodes
+		int getNodeNumber();
+		void setNodeNumber(int nodeNumber);
 
 	private:
 		int nodeNumber;
@@ -22,7 +24,8 @@ class Node{
 };	
 
 Node::Node(std::string userInput, int nodeNumber) {
-	this->block = new Block(userInput);
+	Block block(userInput);
+	this->block = block;
 	this->nodeNumber = nodeNumber;
 }
 
@@ -49,15 +52,13 @@ void Node::split(std::vector<std::string>& vecToPopulate, std::string stringToSp
 	}
 }
 
-void Node::createFat(std::vector<node> &nodes, std::string userInput, int numFiles) {
+void Node::createFat(std::vector<Node> &nodes, std::string userInput, int numFiles) {
 	std::vector<std::string> splitStrings;
 	split(splitStrings, userInput, numFiles);
 
 	for (int i = 0; i < splitStrings.size(); i++) {
-		Node temp;
-		temp.setNodeNumber(nodes.size());
-		block(splitStrings[i]);
-		fat();
+		Node temp(splitStrings[i], nodes.size());
+		//fat();
 		nodes.push_back(temp);
 	}
 }
@@ -79,27 +80,27 @@ void Node::createFat(std::vector<node> &nodes, std::string userInput, int numFil
 
 
 //getters and setters
-int getNodeNumber() {
+int Node::getNodeNumber() {
 	return nodeNumber;
 }
 
-void setNodeNumber(int nodeNumber) {
+void Node::setNodeNumber(int nodeNumber) {
 	this.nodeNumber = nodeNumber;
 }
 
-Block getBlock() {
+/*Block Node::getBlock() {
 	return block;
-}
+}*/
 
-/*void setBlock(string s) {
+/*void Node::setBlock(string s) {
 
 }*/
 
-Fat getFat() {
+/*Fat Node::getFat() {
 	return fat;
-}
+}*/
 
-/*void setFat(){
+/*void Node::setFat(){
 
 }*/
 #endif 

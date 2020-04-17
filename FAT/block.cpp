@@ -5,15 +5,15 @@
 
 class Block{
 	public:
-		Block(std::string userInput)	//constructor
+		Block(std::string userInput);	//constructor
 		std::string getData();	//getter	
-		void setData();	//setter
+		void setData(std::string data);	//setter
 	private:
 		std::string data;
 };	
 
 Block::Block(std::string userInput) {
-	this.data = userInput;	//data
+	this->data = userInput;	//data
 }
 
 std::string Block::getData() {
