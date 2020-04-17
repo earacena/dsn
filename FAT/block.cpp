@@ -1,37 +1,27 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include <iostream> //counts
+#include <iostream> //couts
 
-template <typename T>
 class Block{
 	public:
-		Block(T userInput, int location){
-			this.data = userInput;	//data
-			this.location = location;	//location of block
-		}
-		T getData();
-		int getLocation();
+		Block(std::string userInput)	//constructor
+		std::string getData();	//getter	
+		void setData();	//setter
 	private:
-		T data;
-		int location;
+		std::string data;
 };	
 
-template <typename T>
-T Block::getData() {
-	return this.data;
+Block::Block(std::string userInput) {
+	this.data = userInput;	//data
 }
 
-int Block::getLocation() {
-	return this.location;
+std::string Block::getData() {
+	return data;
 }
 
-template <typename T>
-void setData(T data) {
-	this.data = data;
+void Block::setData(std::string data) {
+	this->data = data;
 }
 
-void setLocation(int location) {
-	this.location = location;
-}
 #endif 
