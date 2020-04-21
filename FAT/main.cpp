@@ -17,7 +17,6 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 	for (int i = 0; i < length; i++) {	//split
 		temp += stringToSplit[i];
 		if (i % splitSize == 0 && i != 0) {
-			//std::cout << "I have Split " << i << " % " << splitSize << std::endl;
 			vecToPopulate.push_back(temp);
 		}
 	}
@@ -69,7 +68,7 @@ int main (int argc, char *argv[]){
 					fatIsSetUp = true;
 				}
 				else{
-					std::cout << "Fat already set up" << std::endl;
+					std::cout << "Fat already set up, please enter another comand" << std::endl;
 				}
 				break;
 			/*case 2:

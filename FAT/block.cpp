@@ -4,12 +4,10 @@
 #include <iostream> //couts
 #include "node.cpp"
 
-//class Block : public Node{
 class Block{
 	public:
 		Block();
 		Block(std::string userInput);	//constructor
-		//Node(int nodeNumber) : Block(int nodeNumber);
 
 		//getters and setters
 		std::string getData();		
@@ -23,12 +21,8 @@ Block::Block(){
 }
 
 Block::Block(std::string userInput) {
-	this->data = userInput;	//data
+	this->data = userInput;	
 }
-
-/*Block::Block(int nodeNumber) : Node::Node(int nodeNumber){
-	this->nodeNumber = nodeNumber;
-}*/
 
 //getters and setters
 std::string Block::getData() {

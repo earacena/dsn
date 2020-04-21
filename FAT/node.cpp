@@ -9,11 +9,8 @@
 
 class Node{
 	public:
-		Node(int nodeNumber);
+		//Node(int nodeNumber);
 		Node(std::string userInput, int nodeNumber);
-
-		void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces);	//split string into vector 
-		void createFat(std::vector<Node> &nodes, std::string userInput, int numFiles);	//create nodes
 		
 		//getters and setters
 		int getNodeNumber();
@@ -27,17 +24,14 @@ class Node{
 		//Fat fat;	//fix after
 };	
 
-Node::Node(int nodeNumber) {
+/*Node::Node(int nodeNumber) {
 	this->nodeNumber = nodeNumber;
-	Block block;
-}
+}*/
 
 Node::Node(std::string userInput, int nodeNumber) {
 	this->nodeNumber = nodeNumber;
-	//Block(userInput);
-	Block block;
-	block.setData(userInput);
-	
+	Block block(userInput);
+	this->block = block;
 }
 
 //getters and setters
@@ -53,15 +47,7 @@ Block Node::getBlock() {
 	return this->block;
 }
 
-/*void Node::setBlock(string s) {
-
-}*/
-
 /*Fat Node::getFat() {
 	return fat;
-}*/
-
-/*void Node::setFat(){
-
 }*/
 #endif 
