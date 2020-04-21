@@ -6,6 +6,7 @@
 #include "node.cpp"	//nodes
 #include "block.cpp"	//block data
 
+//implement later
 class Fat{
 	public:
 		//getters and setters
