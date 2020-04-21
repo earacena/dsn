@@ -18,6 +18,7 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 		temp += stringToSplit[i];
 		if (i % splitSize == 0 && i != 0) {
 			vecToPopulate.push_back(temp);
+			temp = "";
 		}
 	}
 
