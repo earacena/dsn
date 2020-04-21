@@ -21,16 +21,20 @@ class Node{
 		int nodeNumber;
 		Block block;	//blocks currently just hold 1 piece of data. Later implement to hold more. 
 		//std::map<int, Block> blockInfo;	//use case 4, when each block more than 1 piece of information. Do later
-		Fat fat;
+		//Fat fat;	//fix after
 };	
 
 Node::Node(int nodeNumber) {
 	this->nodeNumber = nodeNumber;
+	Block block;
 }
 
 Node::Node(std::string userInput, int nodeNumber) {
-	this->block.setData(userInput);
 	this->nodeNumber = nodeNumber;
+	//Block(userInput);
+	Block block;
+	block.setData(userInput);
+	
 }
 
 void Node::split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//works completely, maybe check out cases where length < numPieces

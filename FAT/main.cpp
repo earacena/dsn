@@ -27,7 +27,7 @@ int main (int argc, char *argv[]){
 					numFiles = 3;
 					//Node node;
 					//node.Node::createFat(nodes, userInput, numFiles);	//creates nodes and puts it into nodes vector
-					Node::createFat(nodes, userInput, numFiles);	//creates nodes and puts it into nodes vector
+					//Node::createFat(nodes, userInput, numFiles);	//creates nodes and puts it into nodes vector
 					fatIsSetUp = true;
 				}
 				break;

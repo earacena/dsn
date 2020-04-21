@@ -2,25 +2,33 @@
 #define BLOCK_H
 
 #include <iostream> //couts
+#include "node.cpp"
 
+//class Block : public Node{
 class Block{
 	public:
-		Block(std::string userInput, int nodeNumber);	//constructor
+		Block();
+		Block(std::string userInput);	//constructor
+		//Node(int nodeNumber) : Block(int nodeNumber);
 
 		//getters and setters
 		std::string getData();		
 		void setData(std::string data);	
-		int getNodeNumber();
-		void setNodeNumber(int nodeNumber);
 	private:
 		std::string data;
-		int nodeNumber;
 };	
 
-Block::Block(std::string userInput, int nodeNumber) {
-	this->data = userInput;	//data
-	this->nodeNumber = nodeNumber;
+Block::Block(){
+	this->data = "bleh";
 }
+
+Block::Block(std::string userInput) {
+	this->data = userInput;	//data
+}
+
+/*Block::Block(int nodeNumber) : Node::Node(int nodeNumber){
+	this->nodeNumber = nodeNumber;
+}*/
 
 //getters and setters
 std::string Block::getData() {
@@ -29,14 +37,6 @@ std::string Block::getData() {
 
 void Block::setData(std::string data) {
 	this->data = data;
-}
-
-int Block::getNodeNumber() {
-	return nodeNumber;
-}
-
-void Block::setNodeNumber(int nodeNumber) {
-	this->nodeNumber = nodeNumber;
 }
 
 #endif 
