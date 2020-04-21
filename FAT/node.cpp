@@ -9,6 +9,7 @@
 
 class Node{
 	public:
+		Node(int nodeNumber);
 		Node(std::string userInput, int nodeNumber);
 
 		void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces);	//split string into vector 
@@ -22,6 +23,10 @@ class Node{
 		//std::map<int, Block> blockInfo;	//use case 4, when each block more than 1 piece of information. Do later
 		Fat fat;
 };	
+
+Node::Node(int nodeNumber) {
+	this->nodeNumber = nodeNumber;
+}
 
 Node::Node(std::string userInput, int nodeNumber) {
 	this->block.setData(userInput);

@@ -8,6 +8,7 @@
 
 class Fat{
 	public:
+		//getters and setters
 		std::vector<Node>& getNodes();
 		void setNodes(std::vector<Node> vector);
 		std::string getFileName();
@@ -18,6 +19,7 @@ class Fat{
 		std::string fileName;
 };	
 
+//getters and setters
 std::vector<Node>& Fat::getNodes() {	
 	return nodes;
 }

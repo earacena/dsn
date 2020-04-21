@@ -17,12 +17,6 @@ int main (int argc, char *argv[]){
 
 		switch (userChoice) 
 		{
-			/*case 2:
-				std::cout << "Enter what to put into the file" << std::endl;
-				std::cin >> userInput;
-				std::string tempString = "This is my plain text that wil' be split up";
-				//Fat::fat(userInput, numSplit);
-				break;*/
 			case 1:	//set up fat once.
 				if (fatIsSetUp == false) {
 					/*std::cout << "Enter input to store" << std::endl;
@@ -37,6 +31,12 @@ int main (int argc, char *argv[]){
 					fatIsSetUp = true;
 				}
 				break;
+			/*case 2:
+				std::cout << "Enter what to put into the file" << std::endl;
+				std::cin >> userInput;
+				std::string tempString = "This is my plain text that wil' be split up";
+				//Fat::fat(userInput, numSplit);
+				break;*/
 			default:
 				std::cout << "You didn't enter a correct command" << std::endl;
 				break;
