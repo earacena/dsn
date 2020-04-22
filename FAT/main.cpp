@@ -45,7 +45,7 @@ void printFat(std::vector<Node> &nodes){
 void importFat(std::vector<Node> &nodes, std::string filename){
 	int nodeNumber;
 	std::string content;
-	ifstream myFile;
+	std::ifstream myFile;
 
 	myFile.open(filename);
 	while (!myFile.eof) {
@@ -57,12 +57,12 @@ void importFat(std::vector<Node> &nodes, std::string filename){
 	myFile.close();
 }
 void exportFat(std::vector<Node> &nodes){
-	ofstream myFile;
+	std::ofstream myFile;
 
 	myFile.open("backup.txt");
 	//similar to the print function, just outputs.
 	for (int i = 0; i < nodes.size(); i++) {
-		myFile << nodes[i].getNodeNumber << " " << nodes[i].getBlock().getData() << std::endl;
+		myFile << nodes[i].getNodeNumber() << " " << nodes[i].getBlock().getData() << std::endl;
 	}
 	myFile.close();
 }
