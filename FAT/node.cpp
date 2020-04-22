@@ -10,7 +10,7 @@
 class Node{
 	public:
 		//Node(int nodeNumber);
-		Node(std::string userInput, int nodeNumber);
+		Node(int nodeNumber, std::string userInput);
 		
 		//getters and setters
 		int getNodeNumber();
@@ -28,7 +28,7 @@ class Node{
 	this->nodeNumber = nodeNumber;
 }*/
 
-Node::Node(std::string userInput, int nodeNumber) {
+Node::Node(int nodeNumber, std::string userInput) {
 	this->nodeNumber = nodeNumber;
 	Block block(userInput);
 	this->block = block;
