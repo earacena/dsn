@@ -26,6 +26,7 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 	if (vecToPopulate.size() != numPieces) {	//get last string if not perfect division
 		vecToPopulate.push_back(temp);
 	}
+	stringToSplit.clear();
 }	 //works 100%
 void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> splitStrings) {	//vector to nodes
 	for (int i = 0; i < splitStrings.size(); i++) {
@@ -38,8 +39,13 @@ void createFatFromInput(std::vector<Node> &nodes, int nodeNumber, std::string co
 	nodes.push_back(temp);
 }
 void printFat(std::vector<Node> &nodes){
-	for(int i=0; i<nodes.size(); i++){
-		std::cout << "Node number: " << nodes[i].getNodeNumber() << " content: " << nodes[i].getBlock().getData() << std::endl;
+	if(nodes.size() > 0){
+		for(int i=0; i<nodes.size(); i++){
+			std::cout << "Node number: " << nodes[i].getNodeNumber() << " content: " << nodes[i].getBlock().getData() << std::endl;
+		}
+	}
+	else{
+		std::cout << "Your fat is empty" << std::endl;
 	}
 }
 void importFat(std::vector<Node> &nodes, std::string filename){
@@ -48,7 +54,7 @@ void importFat(std::vector<Node> &nodes, std::string filename){
 	std::ifstream myFile;
 
 	myFile.open(filename);
-	while (!myFile.eof) {
+	while (!myFile.eof()) {
 		myFile >> nodeNumber >> content;
 		//once map is implemented
 		//myFile >> nodeNumber >> blockNumber >> content;
@@ -71,7 +77,6 @@ int main (int argc, char *argv[]){
 	int userChoice;
 	std::string userInput;
 	int numFiles;
-	bool fatIsSetUp = false;
 	std::vector<std::string> splitStrings;
 	std::vector<Node> nodes;
 
@@ -83,21 +88,16 @@ int main (int argc, char *argv[]){
 		switch (userChoice) 
 		{
 			case 1:	//set up fat once.
-				if (fatIsSetUp == false) {
-					/*std::cout << "Enter input to store" << std::endl;
-					std::cin >> userInput;
-					std::cout << "enter amount of files: " << std::endl; 
-					std::cin >> numFiles;*/
-					userInput = "Hello there, i am a very long string";
-					numFiles = 3;
+				std::cout << "Setting up File Allocation Table" << std::endl;
+				/*std::cout << "Enter input to store" << std::endl;
+				std::cin >> userInput;
+				std::cout << "enter amount of files: " << std::endl; 
+				std::cin >> numFiles;*/
+				userInput = "Hello there, i am a very long string";
+				numFiles = 3;
 
-					split(splitStrings, userInput, numFiles); //string vector, string, int					
-					createFatFromVector(nodes, splitStrings);
-					fatIsSetUp = true;
-				}
-				else{
-					std::cout << "Fat already set up, please enter another comand" << std::endl;
-				}
+				split(splitStrings, userInput, numFiles); //string vector, string, int					
+				createFatFromVector(nodes, splitStrings);
 				break;
 			case 2:
 				//std::cout << "Enter what to put into the file" << std::endl;
@@ -114,6 +114,7 @@ int main (int argc, char *argv[]){
 				printFat(nodes);
 				break;
 			case 7: 
+				std::cout << "Clearing File Allocation Table" << std::endl;
 				nodes.clear();
 				break;
 			case 8: 
