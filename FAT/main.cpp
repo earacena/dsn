@@ -2,6 +2,7 @@
 #include <vector>		//data storage
 #include "node.cpp"		//nodes
 #include "block.cpp"	//blocks for createBlock
+//#include "fat.cpp"
 #include <fstream>		//file generation
 #include <iomanip>		//io manipulation - for inputs 
 #include <sstream>		//for importing FAT (iss >> x)
@@ -37,12 +38,12 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 }	  
-void swapStrings(std::string& a, std::string& b) {
+void swapStrings(std::string &a, std::string &b) {
 	std::string temp = a;
 	a = b;
 	b = temp;
 }
-void shuffleVector(std::vector<std::string> vecToShuffle) {
+void shuffleVector(std::vector<std::string> &vecToShuffle) {
 	int random;
 	for (int i = 0; i < vecToShuffle.size(); i++) {
 		random = rand() % vecToShuffle.size();	//between 0 and size()-1
@@ -58,12 +59,11 @@ void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &spl
 }
 void createBlocks(std::vector<Node> &nodes, std::string content){
 	Block temp(content);
-	nodes[0].getBlocks().push_back(temp);
+	nodes[0].getBlocks().push_back(temp);	//change later
 }
 void printFat(std::vector<Node> &nodes){	//properly working
-	printNice("Showing File Allocation Table");
-
 	if(nodes.size() > 0){
+		printNice("Showing File Allocation Table");
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
 				std::cout << "Node number: " << nodes[i].getNodeNumber() << " content: " << nodes[i].getBlocks()[j].getData() << std::endl;
@@ -73,6 +73,10 @@ void printFat(std::vector<Node> &nodes){	//properly working
 	else{
 		printNice("Your File Allocation Table is empty");
 	}
+}
+void printFat2(std::vector<Node> &nodes){	//works
+	//nodes[0].getNodes()[0].getFileName();
+	std::cout << "file name is: " << nodes[0].getFat().getFileName() << std::endl;
 }
 void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 	printNice("Importing File Allocation Table from file");
@@ -167,6 +171,9 @@ int main (int argc, char *argv[]){
 				break;
 			case 3:
 				printFat(nodes);
+				break;
+			case 4: 
+				printFat2(nodes);
 				break;
 			case 7: 
 				printNice("Clearing File Allocation Table");
