@@ -1,8 +1,11 @@
-#include <iostream> //couts
-#include <vector> //data storage
-#include "node.cpp"	//nodes
-#include "block.cpp"
-#include <fstream>	//file generation
+#include <iostream>		//couts
+#include <vector>		//data storage
+#include "node.cpp"		//nodes
+#include "block.cpp"	//blocks for createBlock
+#include <fstream>		//file generation
+#include <iomanip>		//io manipulation - for inputs 
+#include <sstream>		//for importing FAT (iss >> x)
+#include <stdlib.h>		//random
 
 void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate
 	int length = stringToSplit.length();
@@ -26,24 +29,30 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 }	  
+void shuffleVector(std::vector<std::string> vecToShuffle) {
+	int random;
+	for (int i = 0; i < vecToShuffle; i++) {
+		random = rand() % vecToShuffle;	//between 0 and size()-1
+		swapStrings(vecToShuffle[i], vecToShuffle[random]);
+	}
+}
+void swapStrings(std::string& a, std::string& b) {
+	std::string temp = a;
+	a = b;
+	b = temp;
+}
 void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &splitStrings) {	//populates fat with splitStrings
 	for (int i = 0; i < splitStrings.size(); i++) {
 		Node temp(nodes.size(), splitStrings[i]);	//nodeNumber, content 
 		nodes.push_back(temp);
 	}
-	//std::vector<std::string>::iterator begin = splitStrings.begin();cl
-	//splitStrings.erase(begin,splitStrings.size());
 	splitStrings.clear();
-}
-void createFatFromInput(std::vector<Node> &nodes, int nodeNumber, std::string content) {	//for importing fats: creates each input individually.
-	Node temp(nodeNumber, content);
-	nodes.push_back(temp);
 }
 void createBlocks(std::vector<Node> &nodes, std::string content){
 	Block temp(content);
 	nodes[0].getBlocks().push_back(temp);
 }
-void printFat(std::vector<Node> &nodes){
+void printFat(std::vector<Node> &nodes){	//properly working
 	std::cout << "Showing File Allocation Table" << std::endl;
 
 	if(nodes.size() > 0){
@@ -59,21 +68,31 @@ void printFat(std::vector<Node> &nodes){
 }
 void importFat(std::vector<Node> &nodes, std::string filename){	//need to be fixed later to adapt to new block vector.
 	std::cout << "Importing File Allocation Table from file" << std::endl;
-
-	int nodeNumber;
-	std::string content;
 	std::ifstream myFile;
+	std::string line, content;
+	int nodeNumber, blockNumber, counter=0;
 
 	myFile.open(filename);
-	while (!myFile.eof()) {
-		myFile >> nodeNumber >> content;
-		//once map is implemented
-		//myFile >> nodeNumber >> blockNumber >> content;
-		createFatFromInput(nodes, nodeNumber, content);
+	if (myFile) {
+		while (getline(myFile, line)) {
+			istringstream iss(line);
+			iss >> nodeNumber;
+			Node temp(nodeNumber);
+			nodes.push_back(temp);
+			while (iss >> blockNumber >> content) {
+				Block temp(content);
+				nodes[counter].getBlocks().push_back(temp);
+			}
+			counter++;
+		}
+		myFile.close();
 	}
-	myFile.close();
+	else {
+		std::cout << "error opening file" << std::endl;
+		return;
+	}
 }
-void exportFat(std::vector<Node> &nodes){
+void exportFat(std::vector<Node> &nodes){	//working properly
 	std::cout << "Exporting File Allocation Table as backup.txt" << std::endl;
 
 	std::ofstream myFile;
@@ -97,12 +116,17 @@ int main (int argc, char *argv[]){
 
 	while (true) 
 	{
-		std::cout << "Enter \n 1 to set up Fat, \n 2 to create new file, \n 3 to show fat, \n 7 to clear fat, \n 8 to import fat, \n 9 to export fat" << std::endl;
+		std::cout << std::left	<< std::setw(15) << "1: Set up FAT" 
+								<< std::setw(15) << "2: Add new file" 
+								<< std::setw(15) << "3: Show FAT" 
+								<< std::setw(15) << "7: Clear FAT" 
+								<< std::setw(15) << "8: Import FAT" 
+								<< std::setw(15) << "9: Export FAT" << std::endl;
 		std::cin >> userChoice;
 
 		switch (userChoice) 
 		{
-			case 1:	//set up fat once: makes the nodes and keeps that amount of nodes forever.
+			case 1:	//set up fat once: makes the nodes and keeps that amount of nodes until deleted.
 				if(fatIsSetUp == false){
 					std::cout << "Setting up File Allocation Table" << std::endl;
 					/*std::cout << "Enter input to store" << std::endl;
@@ -121,18 +145,20 @@ int main (int argc, char *argv[]){
 				}	
 				break;
 			case 2:	//any additional file will be split and added randomly to different nodes that was already set up.
-				//std::cout << "Enter what to put into the file" << std::endl;
-				//std::cin >> userInput;
-				userInput = "This is my plain text that wil' be split up";
-				numFiles = 3;
+				if (fatIsSetUp == true) {	//only adds these blocks if there are nodes to hold them.
+					//std::cout << "Enter what to put into the file" << std::endl;
+					//std::cin >> userInput;
+					userInput = "This is my plain text that wil' be split up";
 
-				split(splitStrings, userInput, numFiles);
-				for(int i=0; i<splitStrings.size(); i++){
-					createBlocks(nodes, splitStrings[i]);
+					split(splitStrings, userInput, numFiles);
+					for(int i=0; i<splitStrings.size(); i++){
+						createBlocks(nodes, splitStrings[i]);
+					}
+					splitStrings.clear();
 				}
-
-				//do code
-				splitStrings.clear();
+				else {
+					std::cout << "Please set up the File Allocation Table First" << std::endl;
+				}
 				break;
 			case 3:
 				printFat(nodes);
@@ -157,6 +183,5 @@ int main (int argc, char *argv[]){
 				break;
 		}
 	}
-
 	return 0;
 }

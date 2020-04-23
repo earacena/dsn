@@ -7,6 +7,7 @@
 
 class Node{
 	public:
+		Node(int nodeNumber);
 		Node(int nodeNumber, std::string userInput);
 		
 		//getters and setters
@@ -20,6 +21,10 @@ class Node{
 		std::vector<Block> blocks;
 		//Fat fat;	//fix after
 };	
+
+Node::Node(int nodeNumber) {
+	this->nodeNumber = nodeNumber;
+}
 
 Node::Node(int nodeNumber, std::string userInput) {
 	this->nodeNumber = nodeNumber;
