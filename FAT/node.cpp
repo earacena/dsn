@@ -9,29 +9,24 @@
 
 class Node{
 	public:
-		//Node(int nodeNumber);
 		Node(int nodeNumber, std::string userInput);
 		
 		//getters and setters
 		int getNodeNumber();
 		void setNodeNumber(int nodeNumber);
-		Block getBlock();
+		//Block getBlock();
+		std::vector<Block>& getBlocks();
 
 	private:
 		int nodeNumber;
-		Block block;	//blocks currently just hold 1 piece of data. Later implement to hold more. 
-		//std::map<int, Block> blockInfo;	//use case 4, when each block more than 1 piece of information. Do later
+		std::vector<Block> blocks;
 		//Fat fat;	//fix after
 };	
-
-/*Node::Node(int nodeNumber) {
-	this->nodeNumber = nodeNumber;
-}*/
 
 Node::Node(int nodeNumber, std::string userInput) {
 	this->nodeNumber = nodeNumber;
 	Block block(userInput);
-	this->block = block;
+	this->blocks.push_back(block);
 }
 
 //getters and setters
@@ -43,8 +38,12 @@ void Node::setNodeNumber(int nodeNumber) {
 	this->nodeNumber = nodeNumber;
 }
 
-Block Node::getBlock() {
+/*Block Node::getBlock() {
 	return this->block;
+}*/
+
+std::vector<Block>& Node::getBlocks() {	
+	return blocks;
 }
 
 /*Fat Node::getFat() {

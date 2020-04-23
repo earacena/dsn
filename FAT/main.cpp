@@ -4,8 +4,7 @@
 #include "node.cpp"	//nodes
 #include <fstream>	//file generation
 
-//Splits stringToSplit into numPieces and puts them into vecToPopulate
-void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//works completely, maybe check out cases where length < numPieces
+void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate
 	int length = stringToSplit.length();
 	if (length == 0) {	//check empty
 		std::cout << "Nothing to Split" << std::endl;
@@ -27,28 +26,34 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 	stringToSplit.clear();
-}	 //works 100%
-void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> splitStrings) {	//vector to nodes
+}	  
+void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> splitStrings) {	//populates fat with splitStrings
 	for (int i = 0; i < splitStrings.size(); i++) {
-		Node temp(nodes.size(), splitStrings[i]);	//string, nodeNumber
+		Node temp(nodes.size(), splitStrings[i]);	//nodeNumber, content 
 		nodes.push_back(temp);
 	}
 }
-void createFatFromInput(std::vector<Node> &nodes, int nodeNumber, std::string content) {	
+void createFatFromInput(std::vector<Node> &nodes, int nodeNumber, std::string content) {	//for importing fats: creates each input individually.
 	Node temp(nodeNumber, content);
 	nodes.push_back(temp);
 }
 void printFat(std::vector<Node> &nodes){
+	std::cout << "Showing File Allocation Table" << std::endl;
+
 	if(nodes.size() > 0){
-		for(int i=0; i<nodes.size(); i++){
-			std::cout << "Node number: " << nodes[i].getNodeNumber() << " content: " << nodes[i].getBlock().getData() << std::endl;
+		for(int i=0; i<nodes.size(); i++){	//goes through each node
+			for (int j = 0; j < nodes[i].getBlocks().size(); i++) {	//goes through each block of that node.
+				std::cout << "Node number: " << nodes[i].getNodeNumber() << " content: " << nodes[i].getBlocks()[j].getData() << std::endl;
+			}
 		}
 	}
 	else{
-		std::cout << "Your fat is empty" << std::endl;
+		std::cout << "Your File Allocation Table is empty" << std::endl;
 	}
 }
-void importFat(std::vector<Node> &nodes, std::string filename){
+void importFat(std::vector<Node> &nodes, std::string filename){	//need to be fixed later to adapt to new block vector.
+	std::cout << "Importing File Allocation Table from file" << std::endl;
+
 	int nodeNumber;
 	std::string content;
 	std::ifstream myFile;
@@ -63,12 +68,16 @@ void importFat(std::vector<Node> &nodes, std::string filename){
 	myFile.close();
 }
 void exportFat(std::vector<Node> &nodes){
+	std::cout << "Exporting File Allocation Table as backup.txt" << std::endl;
+
 	std::ofstream myFile;
 
 	myFile.open("backup.txt");
 	//similar to the print function, just outputs.
 	for (int i = 0; i < nodes.size(); i++) {
-		myFile << nodes[i].getNodeNumber() << " " << nodes[i].getBlock().getData() << std::endl;
+		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
+			myFile << nodes[i].getNodeNumber() << " " << nodes[i].getBlocks()[j].getData() << std::endl;
+		}
 	}
 	myFile.close();
 }
@@ -82,7 +91,7 @@ int main (int argc, char *argv[]){
 
 	while (true) 
 	{
-		std::cout << "Enter 1 to set up Fat, 2 to create new file, 3 to show fat, 7 to clear fat, 8 to import fat, 9 to export fat" << std::endl;
+		std::cout << "Enter 1 to set up Fat, \n 2 to create new file, \n 3 to show fat, \n 7 to clear fat, \n 8 to import fat, \n 9 to export fat" << std::endl;
 		std::cin >> userChoice;
 
 		switch (userChoice) 
@@ -104,13 +113,11 @@ int main (int argc, char *argv[]){
 				//std::cin >> userInput;
 				userInput = "This is my plain text that wil' be split up";
 				numFiles = 3;
-				split(splitStrings, userInput, numFiles);
 
+				split(splitStrings, userInput, numFiles);
 				//do code
 				break;
 			case 3:
-				std::cout << "Showing File Allocation Table" << std::endl;
-
 				printFat(nodes);
 				break;
 			case 7: 

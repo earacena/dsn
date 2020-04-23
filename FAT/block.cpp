@@ -2,7 +2,7 @@
 #define BLOCK_H
 
 #include <iostream> //couts
-#include "node.cpp"
+//#include "node.cpp"
 
 class Block{
 	public:
