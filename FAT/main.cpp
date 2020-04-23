@@ -7,10 +7,18 @@
 #include <sstream>		//for importing FAT (iss >> x)
 #include <stdlib.h>		//random
 
+#define RESET 	"\033[0m"
+#define YELLOW 	"\033[33m"
+#define RED 	"\033[31m"
+#define CYAN 	"\033[36m"
+
+void printNice(std::string print){
+	std::cout << YELLOW << "*****" << print << "*****"  << RESET << std::endl;
+}
 void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate
 	int length = stringToSplit.length();
 	if (length == 0) {	//check empty
-		std::cout << "Nothing to Split" << std::endl;
+		printNice("Nothing to Split");
 		return;
 	}
 
@@ -29,17 +37,17 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 }	  
-void shuffleVector(std::vector<std::string> vecToShuffle) {
-	int random;
-	for (int i = 0; i < vecToShuffle; i++) {
-		random = rand() % vecToShuffle;	//between 0 and size()-1
-		swapStrings(vecToShuffle[i], vecToShuffle[random]);
-	}
-}
 void swapStrings(std::string& a, std::string& b) {
 	std::string temp = a;
 	a = b;
 	b = temp;
+}
+void shuffleVector(std::vector<std::string> vecToShuffle) {
+	int random;
+	for (int i = 0; i < vecToShuffle.size(); i++) {
+		random = rand() % vecToShuffle.size();	//between 0 and size()-1
+		swapStrings(vecToShuffle[i], vecToShuffle[random]);
+	}
 }
 void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &splitStrings) {	//populates fat with splitStrings
 	for (int i = 0; i < splitStrings.size(); i++) {
@@ -53,7 +61,7 @@ void createBlocks(std::vector<Node> &nodes, std::string content){
 	nodes[0].getBlocks().push_back(temp);
 }
 void printFat(std::vector<Node> &nodes){	//properly working
-	std::cout << "Showing File Allocation Table" << std::endl;
+	printNice("Showing File Allocation Table");
 
 	if(nodes.size() > 0){
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
@@ -63,19 +71,19 @@ void printFat(std::vector<Node> &nodes){	//properly working
 		}
 	}
 	else{
-		std::cout << "Your File Allocation Table is empty" << std::endl;
+		printNice("Your File Allocation Table is empty");
 	}
 }
-void importFat(std::vector<Node> &nodes, std::string filename){	//need to be fixed later to adapt to new block vector.
-	std::cout << "Importing File Allocation Table from file" << std::endl;
+void importFat(std::vector<Node> &nodes, std::string filename){	//not working
+	printNice("Importing File Allocation Table from file");
 	std::ifstream myFile;
 	std::string line, content;
 	int nodeNumber, blockNumber, counter=0;
-
+	
 	myFile.open(filename);
 	if (myFile) {
 		while (getline(myFile, line)) {
-			istringstream iss(line);
+			std::istringstream iss(line);
 			iss >> nodeNumber;
 			Node temp(nodeNumber);
 			nodes.push_back(temp);
@@ -88,12 +96,12 @@ void importFat(std::vector<Node> &nodes, std::string filename){	//need to be fix
 		myFile.close();
 	}
 	else {
-		std::cout << "error opening file" << std::endl;
+		printNice("error opening file");
 		return;
 	}
 }
 void exportFat(std::vector<Node> &nodes){	//working properly
-	std::cout << "Exporting File Allocation Table as backup.txt" << std::endl;
+	printNice("Exporting File Allocation Table as backup.txt");
 
 	std::ofstream myFile;
 
@@ -116,19 +124,15 @@ int main (int argc, char *argv[]){
 
 	while (true) 
 	{
-		std::cout << std::left	<< std::setw(15) << "1: Set up FAT" 
-								<< std::setw(15) << "2: Add new file" 
-								<< std::setw(15) << "3: Show FAT" 
-								<< std::setw(15) << "7: Clear FAT" 
-								<< std::setw(15) << "8: Import FAT" 
-								<< std::setw(15) << "9: Export FAT" << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add new file, 3: Show FAT, 7: Clear FAT, 8: Import FAT, 9: Export FAT" << RESET << std::endl;
+		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
 		switch (userChoice) 
 		{
 			case 1:	//set up fat once: makes the nodes and keeps that amount of nodes until deleted.
 				if(fatIsSetUp == false){
-					std::cout << "Setting up File Allocation Table" << std::endl;
+					printNice("Setting up File Allocation Table");
 					/*std::cout << "Enter input to store" << std::endl;
 					std::cin >> userInput;
 					std::cout << "enter amount of files: " << std::endl; 
@@ -141,11 +145,12 @@ int main (int argc, char *argv[]){
 					fatIsSetUp = true;
 				}			
 				else{
-					std::cout << "The File Allocation Table is already set up" << std::endl;
+					printNice("The File Allocation Table is already set up");
 				}	
 				break;
 			case 2:	//any additional file will be split and added randomly to different nodes that was already set up.
 				if (fatIsSetUp == true) {	//only adds these blocks if there are nodes to hold them.
+					printNice("Creating a file");					
 					//std::cout << "Enter what to put into the file" << std::endl;
 					//std::cin >> userInput;
 					userInput = "This is my plain text that wil' be split up";
@@ -157,14 +162,14 @@ int main (int argc, char *argv[]){
 					splitStrings.clear();
 				}
 				else {
-					std::cout << "Please set up the File Allocation Table First" << std::endl;
+					printNice("Please set up the File Allocation Table First");
 				}
 				break;
 			case 3:
 				printFat(nodes);
 				break;
 			case 7: 
-				std::cout << "Clearing File Allocation Table" << std::endl;
+				printNice("Clearing File Allocation Table");
 				nodes.clear();
 				fatIsSetUp = false;
 				break;
@@ -173,13 +178,19 @@ int main (int argc, char *argv[]){
 				//std::cin >> userInput
 				userInput = "backup.txt";
 
-				importFat(nodes, userInput);
+				if(fatIsSetUp){
+					printNice("You can't import, FAT is already set up");
+				}
+				else{
+					importFat(nodes, userInput);
+					fatIsSetUp = true;
+				}
 				break;
 			case 9:
 				exportFat(nodes);
 				break;
 			default:
-				std::cout << "You didn't enter a correct command" << std::endl;
+				std::cout << RED << "*****You didn't enter a correct command*****" << RESET << std::endl;
 				break;
 		}
 	}

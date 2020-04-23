@@ -3,10 +3,8 @@
 
 #include <iostream>		//counts
 #include <vector>		//data storage
-#include "node.cpp"		//nodes
-//#include "block.cpp"	//block data
+//#include "node.cpp"		//nodes
 
-//implement later
 class Fat{
 	public:
 		//getters and setters
