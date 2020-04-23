@@ -1,9 +1,6 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include <iostream> //couts
-//#include "node.cpp"
-
 class Block{
 	public:
 		Block();

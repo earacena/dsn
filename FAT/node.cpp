@@ -1,10 +1,8 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <iostream>		//couts
 #include <vector>		//data storage
-#include <map>			//maps
-#include "fat.cpp"		//fat
+//#include "fat.cpp"		//fat
 #include "block.cpp"		//block data
 
 class Node{
