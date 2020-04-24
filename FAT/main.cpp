@@ -3,7 +3,7 @@
 #include "node.cpp"		//nodes
 #include "block.cpp"	//blocks for createBlock
 #include <fstream>		//file generation
-#include <iomanip>	//io manipulation - for inputs 
+#include <iomanip>	    //io manipulation - for inputs
 #include <sstream>		//for importing FAT (iss >> x)
 #include <stdlib.h>		//rand
 
@@ -64,7 +64,7 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 
 void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName) {	//populates fat with splitStrings and names it fileName
 	for (int i = 0; i < splitStrings.size(); i++) {	//creates each nodes and populates it with content
-		Node temp(nodes.size());		
+		Node temp(nodes.size());
 		Block b(splitStrings[i], fileName);
 		temp.pushBackBlock(b);
 		nodes.push_back(temp);
@@ -72,7 +72,7 @@ void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &spl
 	}
 	splitStrings.clear();
 }	//creates the nodes and everything
-void createBlocks(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName){	
+void createBlocks(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName){
 	for (int i = 0; i < splitStrings.size(); i++) {
 		Block b(splitStrings[i], fileName);
 		nodes[i].pushBackBlock(b);
@@ -105,7 +105,7 @@ void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 	std::ifstream myFile;
 	std::string line, content;
 	int nodeNumber, blockNumber, counter=0;
-	
+
 	myFile.open(filename);
 	if (myFile) {
 		while (getline(myFile, line)) {
@@ -126,7 +126,24 @@ void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 		return;
 	}
 }
-void exportFat(std::vector<Node> &nodes){	//working properly, add file name afterwards.
+void exportFat(std::vector<Node> &nodes){
+	printNice("Exporting File Allocation Table as backup.txt");
+
+	std::ofstream myFile;
+
+	myFile.open("backup.txt");
+	//similar to the print function, just outputs.
+	for (int i = 0; i < nodes.size(); i++) {
+		myFile << nodes[i].getNodeNumber() << " ";
+		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
+			myFile << nodes[i].getBlocks()[j].getFileName() << " " << nodes[i].getBlocks()[j].getData() << " ";
+		}
+		myFile << std::endl;
+	}
+	myFile.close();
+}
+
+void exportFatEasy(std::vector<Node> &nodes){
 	printNice("Exporting File Allocation Table as backup.txt");
 
 	std::ofstream myFile;
@@ -135,7 +152,7 @@ void exportFat(std::vector<Node> &nodes){	//working properly, add file name afte
 	//similar to the print function, just outputs.
 	for (int i = 0; i < nodes.size(); i++) {
 		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
-			myFile << nodes[i].getNodeNumber() << " " << nodes[i].getBlocks()[j].getData() << std::endl;
+			myFile << nodes[i].getNodeNumber() << " " << nodes[i].getBlocks()[j].getFileName() << " " << nodes[i].getBlocks()[j].getData() << " " << std::endl;
 		}
 	}
 	myFile.close();
@@ -152,18 +169,18 @@ int main (int argc, char *argv[]){
 	std::vector<std::string> fileNames;
 	populateNameVecWithRandom(fileNames);
 
-	while (true) 
+	while (true)
 	{
 		std::cout << CYAN << "1: Set up FAT, 2: Add new file, 3: Show FAT, 7: Clear FAT, 8: Import FAT, 9: Export FAT" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
-		switch (userChoice) 
+		switch (userChoice)
 		{
 			case 1:	//set up fat once: makes the nodes and keeps that amount of nodes until deleted.
 				if(fatIsSetUp){
 					printNice("The File Allocation Table is already set up");
-				}			
+				}
 				else{
 					printNice("Setting up File Allocation Table");
 					/*std::cout << "Enter input to store" << std::endl;
@@ -178,15 +195,15 @@ int main (int argc, char *argv[]){
 					numFiles = 3;
 					fileName = fileNames[nameIterator];
 
-					split(splitStrings, userInput, numFiles); //split userInput into (numFile) strings and puts it into vector splitStrings 				
+					split(splitStrings, userInput, numFiles); //split userInput into (numFile) strings and puts it into vector splitStrings
 					createFatFromVector(nodes, splitStrings, fileName);	//creates starter nodes and assigns them the name and block of that string.
 					fatIsSetUp = true;
 					nameIterator++;
-				}	
+				}
 				break;
 			case 2:	//any additional file will be split and added randomly to different nodes that was already set up.
 				if (fatIsSetUp) {	//only adds these blocks if there are nodes to hold them.
-					printNice("Creating a file");					
+					printNice("Creating a file");
 					/*std::cout << "Enter what to put into the file" << std::endl;
 					std::cin >> userInput;
 					std::cout << "Enter name for the file" << std::endl;
@@ -207,16 +224,16 @@ int main (int argc, char *argv[]){
 			case 3:
 				printFatContent(nodes);
 				break;
-			case 4: 
+			case 4:
 				printFileNames(nodes);
 				break;
-			case 7: 
+			case 7:
 				printNice("Clearing File Allocation Table");
 				nodes.clear();
 				fatIsSetUp = false;
 				nameIterator = 0;
 				break;
-			case 8: 
+			case 8:
 				//std::cout << "Enter file name for import (add extension if applies)" << std::endl;
 				//std::cin >> userInput
 				userInput = "backup.txt";
@@ -230,7 +247,7 @@ int main (int argc, char *argv[]){
 				}
 				break;
 			case 9:
-				exportFat(nodes);
+				exportFatEasy(nodes);
 				break;
 			default:
 				std::cout << RED << "*****You didn't enter a correct command*****" << RESET << std::endl;
