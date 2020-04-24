@@ -10,6 +10,8 @@ class Block{
 		//getters and setters
 		std::string getData();		
 		void setData(std::string data);	
+		std::string getFileName();
+		void setFileName(std::string fileName);
 	private:
 		std::string data;
 		std::string fileName;

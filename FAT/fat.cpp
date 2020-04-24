@@ -15,6 +15,7 @@ class Fat{
 		void setFileName(std::string fileName);
 	private:
 		std::vector<Node> nodes;
+		std::string fileName;
 };	
 
 Fat::Fat(){

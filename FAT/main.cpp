@@ -65,7 +65,7 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName) {	//populates fat with splitStrings and names it fileName
 	for (int i = 0; i < splitStrings.size(); i++) {	//creates each nodes and populates it with content
 		Node temp(nodes.size());		
-		Block b(splitStrings[i]);
+		Block b(splitStrings[i], fileName);
 		temp.pushBackBlock(b);
 		nodes.push_back(temp);
 		//randomize and separate this later
@@ -74,8 +74,8 @@ void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &spl
 }	//creates the nodes and everything
 void createBlocks(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName){	
 	for (int i = 0; i < splitStrings.size(); i++) {
-		Block b(splitStrings[i]);
-		nodes[i].pushBackBlock(b)
+		Block b(splitStrings[i], fileName);
+		nodes[i].pushBackBlock(b);
 	}
 	splitStrings.clear();
 }
@@ -84,9 +84,9 @@ void printFatContent(std::vector<Node> &nodes){	//properly working
 	if(nodes.size() > 0){
 		printNice("Showing File Allocation Table");
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
-			std::cout << std::setw(space) << "Node number: " << nodes[i].getNodeNumber();
+			std::cout << std::left << "Node number " << nodes[i].getNodeNumber() << std::endl;;
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
-				std::cout << std::setw(space) << " " << "file name: " << nodes[i].getBlocks()[j].getFileName() <<" content: " << nodes[i].getBlocks()[j].getData() << std::endl;
+				std::cout << std::setw(space) << " " << "File name: " << nodes[i].getBlocks()[j].getFileName() << std::setw(space) << " content: " <<  nodes[i].getBlocks()[j].getData() << std::endl;
 				//std::cout << std::setw(space) << " " << "file name: " << nodes[i].getFat().getNodes()[i].getFileName() <<" content: " << nodes[i].getBlocks()[j].getData() << std::endl;
 			}
 		}
@@ -97,7 +97,8 @@ void printFatContent(std::vector<Node> &nodes){	//properly working
 }
 void printFileNames(std::vector<Node> &nodes){	//works
 	//nodes[0].getNodes()[0].getFileName();
-	std::cout << "file name is: " << nodes[0].getFat().getFileName() << std::endl;
+	//std::cout << "file name is: " << nodes[0].getFat().getFileName() << std::endl;
+	printNice("Wont print File Names yet");
 }
 void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 	printNice("Importing File Allocation Table from file");
@@ -180,20 +181,24 @@ int main (int argc, char *argv[]){
 					split(splitStrings, userInput, numFiles); //split userInput into (numFile) strings and puts it into vector splitStrings 				
 					createFatFromVector(nodes, splitStrings, fileName);	//creates starter nodes and assigns them the name and block of that string.
 					fatIsSetUp = true;
+					nameIterator++;
 				}	
 				break;
 			case 2:	//any additional file will be split and added randomly to different nodes that was already set up.
 				if (fatIsSetUp) {	//only adds these blocks if there are nodes to hold them.
 					printNice("Creating a file");					
-					//std::cout << "Enter what to put into the file" << std::endl;
-					//std::cin >> userInput;
+					/*std::cout << "Enter what to put into the file" << std::endl;
+					std::cin >> userInput;
+					std::cout << "Enter name for the file" << std::endl;
+					std::cin >> fileName*/
 
 					//values for testing
 					userInput = "This is my plain text that wil' be split up";
+					fileName = fileNames[nameIterator];
 
 					split(splitStrings, userInput, numFiles);
-					createBlocks(nodes, splitStrings);
-					splitStrings.clear();
+					createBlocks(nodes, splitStrings, fileName);
+					nameIterator++;
 				}
 				else {
 					printNice("Please set up the File Allocation Table First");
@@ -203,12 +208,13 @@ int main (int argc, char *argv[]){
 				printFatContent(nodes);
 				break;
 			case 4: 
-				printFat2(nodes);
+				printFileNames(nodes);
 				break;
 			case 7: 
 				printNice("Clearing File Allocation Table");
 				nodes.clear();
 				fatIsSetUp = false;
+				nameIterator = 0;
 				break;
 			case 8: 
 				//std::cout << "Enter file name for import (add extension if applies)" << std::endl;

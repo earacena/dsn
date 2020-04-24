@@ -10,6 +10,8 @@ class Node{
 		Node(int nodeNumber);
 		Node(int nodeNumber, std::string userInput);
 		
+		void pushBackBlock(Block b);		
+
 		//getters and setters
 		int getNodeNumber();
 		void setNodeNumber(int nodeNumber);
