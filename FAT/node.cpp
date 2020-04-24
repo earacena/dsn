@@ -9,13 +9,12 @@ class Node{
 	public:
 		Node(int nodeNumber);
 		Node(int nodeNumber, std::string userInput);
-		
-		void pushBackBlock(Block b);		
+
+		void pushBackBlock(Block b);
 
 		//getters and setters
 		int getNodeNumber();
 		void setNodeNumber(int nodeNumber);
-		//Block getBlock();
 		std::vector<Block>& getBlocks();
 		Fat getFat();
 
@@ -51,11 +50,11 @@ void Node::setNodeNumber(int nodeNumber) {
 	this->nodeNumber = nodeNumber;
 }
 
-std::vector<Block>& Node::getBlocks() {	
+std::vector<Block>& Node::getBlocks() {
 	return blocks;
 }
 
 Fat Node::getFat() {
 	return fat;
 }
-#endif 
+#endif
