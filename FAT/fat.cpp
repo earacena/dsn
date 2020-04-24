@@ -11,8 +11,6 @@ class Fat{
 		//getters and setters
 		std::vector<Node>& getNodes();
 		void setNodes(std::vector<Node> nodes);
-		std::string getFileName();
-		void setFileName(std::string fileName);
 	private:
 		std::vector<Node> nodes;
 		std::string fileName;

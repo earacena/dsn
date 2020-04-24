@@ -6,37 +6,54 @@
 #include <iomanip>	    //io manipulation - for inputs
 #include <sstream>		//for importing FAT (iss >> x)
 #include <stdlib.h>		//rand
+#include <map>			//map multi map
 
 #define RESET 	"\033[0m"
 #define YELLOW 	"\033[33m"
 #define RED 	"\033[31m"
 #define CYAN 	"\033[36m"
 
+//nice functions 
 void printNice(std::string print){
 	std::cout << YELLOW << "*****" << print << "*****"  << RESET << std::endl;
 }
-void populateNameVecWithRandom(std::vector<std::string>& vecToPopulate) {
-	vecToPopulate.push_back("one");
-	vecToPopulate.push_back("two");
-	vecToPopulate.push_back("three");
-	vecToPopulate.push_back("four");
-	vecToPopulate.push_back("five");
-	vecToPopulate.push_back("six");
-	vecToPopulate.push_back("seven");
-	vecToPopulate.push_back("eight");
-	vecToPopulate.push_back("nine");
-	vecToPopulate.push_back("ten");
-}   //vector of strings
-void swapStrings(std::string &a, std::string &b) {	//works
-	std::string temp = a;
+void populateNameVecWithRandom(std::vector<std::string>& fileNames, std::vector<std::string>& content) {
+	fileNames.push_back("one");
+	fileNames.push_back("two");
+	fileNames.push_back("three");
+	fileNames.push_back("four");
+	fileNames.push_back("five");
+	fileNames.push_back("six");
+	fileNames.push_back("seven");
+	fileNames.push_back("eight");
+	fileNames.push_back("nine");
+	fileNames.push_back("ten");
+	fileNames.push_back("eleven");
+	fileNames.push_back("twelve");
+
+	content.push_back("1 We're no strangers to love");
+	content.push_back("2 You know the rules and so do I");
+	content.push_back("3 A full commitment's what I'm thinking of");
+	content.push_back("4 You wouldn't get this from any other guy");
+	content.push_back("5 I just wanna tell you how I'm feeling");
+	content.push_back("6 Gotta make you understand");
+	content.push_back("7 Never gonna give you up");
+	content.push_back("8 Never gonna let you down");
+	content.push_back("9 Never gonna run around and desert you");
+	content.push_back("10 Never gonna make you cry");
+	content.push_back("11 Never gonna say goodbye");
+	content.push_back("12 Never gonna tell a lie and hurt you");
+}   
+template <class T> void swap(T &a, T &b) {	//works
+	T temp = a;
 	a = b;
 	b = temp;
 }
-void shuffleVector(std::vector<std::string> &vecToShuffle) {
+template <class T> void shuffleVector(std::vector<T> &vecToShuffle) {
 	int random;
 	for (int i = 0; i < vecToShuffle.size(); i++) {
 		random = rand() % vecToShuffle.size();	//between 0 and size()-1
-		swapStrings(vecToShuffle[i], vecToShuffle[random]);
+		swap(vecToShuffle[i], vecToShuffle[random]);
 	}
 }
 void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate
@@ -61,28 +78,28 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 }
-
-void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName) {	//populates fat with splitStrings and names it fileName
-	for (int i = 0; i < splitStrings.size(); i++) {	//creates each nodes and populates it with content
-		Node temp(nodes.size());
-		Block b(splitStrings[i], fileName);
-		temp.pushBackBlock(b);
-		nodes.push_back(temp);
-		//randomize and separate this later
+//populate Fat
+void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, pair<int, int>> table, std::vector<std::string> &splitStrings, std::string fileName){
+	std::vector<int> temp;	//the order of temp is where the blocks in splitStrings will go
+	int counter = 0;
+	for (int i = 0; i < splitStrings.size(); i++) {
+		temp.push_back(i);
+		counter++;
 	}
-	splitStrings.clear();
-}	//creates the nodes and everything
-void createBlocks(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName){
+	shuffleVector(temp);
+
 	for (int i = 0; i < splitStrings.size(); i++) {
 		Block b(splitStrings[i], fileName);
-		nodes[i].pushBackBlock(b);
+		nodes[temp[i]].pushBackBlock(b);
+		table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
 	}
 	splitStrings.clear();
 }
+//print
 void printFatContent(std::vector<Node> &nodes){	//properly working
-	int space = 20;
 	if(nodes.size() > 0){
 		printNice("Showing File Allocation Table");
+		int space = 20;
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
 			std::cout << std::left << "Node number " << nodes[i].getNodeNumber() << std::endl;;
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
@@ -95,11 +112,12 @@ void printFatContent(std::vector<Node> &nodes){	//properly working
 		printNice("Your File Allocation Table is empty");
 	}
 }
-void printFileNames(std::vector<Node> &nodes){	//works
-	//nodes[0].getNodes()[0].getFileName();
-	//std::cout << "file name is: " << nodes[0].getFat().getFileName() << std::endl;
-	printNice("Wont print File Names yet");
+void printMap(std::multimap<std::string, pair<int, int>> table) {
+	for (auto i = table.begin(); i != table.end(); i++) {	//prints whole map
+		cout << i->first << "-----" << i->second->first << "-----" i->second->second << endl;
+	}
 }
+//importing and exporting
 void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 	printNice("Importing File Allocation Table from file");
 	std::ifstream myFile;
@@ -142,7 +160,6 @@ void exportFat(std::vector<Node> &nodes){
 	}
 	myFile.close();
 }
-
 void exportFatEasy(std::vector<Node> &nodes){
 	printNice("Exporting File Allocation Table as backup.txt");
 
@@ -164,14 +181,18 @@ int main (int argc, char *argv[]){
 	bool fatIsSetUp = false;
 	std::vector<std::string> splitStrings;
 	std::vector<Node> nodes;
+	std::multimap<std::string, pair<int, int>> table;
 
+
+	//filenames
 	int nameIterator = 0;	//iterates every use
 	std::vector<std::string> fileNames;
-	populateNameVecWithRandom(fileNames);
+	std::vector<std::string> fileContent;
+	populateNameVecWithRandom(fileNames, fileContent);
 
 	while (true)
 	{
-		std::cout << CYAN << "1: Set up FAT, 2: Add new file, 3: Show FAT, 7: Clear FAT, 8: Import FAT, 9: Export FAT" << RESET << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Search file, 7: Clear FAT, 8: Import FAT, 9: Export FAT" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
@@ -183,22 +204,15 @@ int main (int argc, char *argv[]){
 				}
 				else{
 					printNice("Setting up File Allocation Table");
-					/*std::cout << "Enter input to store" << std::endl;
-					std::cin >> userInput;
-					std::cout << "Enter amount of files: " << std::endl;
-					std::cin >> numFiles;
-					std::cout << "Enter name for the file" << std::endl;
-					std::cin >> fileName;*/
-
-					//values for testing
-					userInput = "Hello there, i am a very long string";
+					/* std::cout << "Enter amount of files: " << std::endl;
+					std::cin >> numFiles;*/
 					numFiles = 3;
-					fileName = fileNames[nameIterator];
 
-					split(splitStrings, userInput, numFiles); //split userInput into (numFile) strings and puts it into vector splitStrings
-					createFatFromVector(nodes, splitStrings, fileName);	//creates starter nodes and assigns them the name and block of that string.
+					for (int i = 0; i < numFiles; i++) {
+						Node temp(nodes.size());
+						nodes.push_back(temp);
+					}
 					fatIsSetUp = true;
-					nameIterator++;
 				}
 				break;
 			case 2:	//any additional file will be split and added randomly to different nodes that was already set up.
@@ -209,12 +223,11 @@ int main (int argc, char *argv[]){
 					std::cout << "Enter name for the file" << std::endl;
 					std::cin >> fileName*/
 
-					//values for testing
-					userInput = "This is my plain text that wil' be split up";
+					userInput = fileContent[nameIterator];
 					fileName = fileNames[nameIterator];
 
 					split(splitStrings, userInput, numFiles);
-					createBlocks(nodes, splitStrings, fileName);
+					createBlocks(nodes, table, splitStrings, fileName);
 					nameIterator++;
 				}
 				else {
@@ -225,7 +238,7 @@ int main (int argc, char *argv[]){
 				printFatContent(nodes);
 				break;
 			case 4:
-				printFileNames(nodes);
+				printMap(nodes);
 				break;
 			case 7:
 				printNice("Clearing File Allocation Table");
