@@ -14,7 +14,7 @@
 
 void printNice(std::string print){
 	std::cout << YELLOW << "*****" << print << "*****"  << RESET << std::endl;
-}	 //print nice
+}
 void populateNameVecWithRandom(std::vector<std::string>& vecToPopulate) {
 	vecToPopulate.push_back("one");
 	vecToPopulate.push_back("two");
@@ -31,17 +31,17 @@ void swapStrings(std::string &a, std::string &b) {	//works
 	std::string temp = a;
 	a = b;
 	b = temp;
-}	//swap
+}
 void shuffleVector(std::vector<std::string> &vecToShuffle) {
 	int random;
 	for (int i = 0; i < vecToShuffle.size(); i++) {
 		random = rand() % vecToShuffle.size();	//between 0 and size()-1
 		swapStrings(vecToShuffle[i], vecToShuffle[random]);
 	}
-}	  //shuffle that uses swap
+}
 void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate
 	int length = stringToSplit.length();
-	if (length == 0) {	//check empty
+	if (length == 0) {	
 		printNice("Nothing to Split");
 		return;
 	}
@@ -49,7 +49,7 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 	int splitSize = length / numPieces;
 	std::string temp;
 
-	for (int i = 0; i < length; i++) {	//split
+	for (int i = 0; i < length; i++) {		//split
 		temp += stringToSplit[i];
 		if (i % splitSize == 0 && i != 0) {
 			vecToPopulate.push_back(temp);
@@ -60,7 +60,7 @@ void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, i
 	if (vecToPopulate.size() != numPieces) {	//get last string if not perfect division
 		vecToPopulate.push_back(temp);
 	}
-}	 //split input into numfiles
+}
 
 void createFatFromVector(std::vector<Node> &nodes, std::vector<std::string> &splitStrings, std::string fileName) {	//populates fat with splitStrings and names it fileName
 	for (int i = 0; i < splitStrings.size(); i++) {	//creates each nodes and populates it with content
