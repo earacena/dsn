@@ -5,12 +5,14 @@ class Block{
 	public:
 		Block();
 		Block(std::string userInput);	//constructor
+		Block(std::string userInput, std::string fileName);
 
 		//getters and setters
 		std::string getData();		
 		void setData(std::string data);	
 	private:
 		std::string data;
+		std::string fileName;
 };	
 
 Block::Block(){
@@ -21,6 +23,11 @@ Block::Block(std::string userInput) {
 	this->data = userInput;	
 }
 
+Block::Block(std::string userInput, std::string fileName) {
+	this->data = userInput;	
+	this->fileName = fileName;
+}
+
 //getters and setters
 std::string Block::getData() {
 	return data;
@@ -28,6 +35,14 @@ std::string Block::getData() {
 
 void Block::setData(std::string data) {
 	this->data = data;
+}
+
+std::string Block::getFileName() {
+	return fileName;
+}
+
+void Block::setFileName(std::string fileName) {
+	this->fileName = fileName;
 }
 
 #endif 

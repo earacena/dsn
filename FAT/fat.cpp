@@ -1,10 +1,9 @@
 #ifndef FAT_H
 #define FAT_H
 
-#include <iostream>	//counts
 #include <vector>	//data storage
-//#include "node.cpp"	//nodes
-class Node;
+
+class Node;	//forward declaration
 class Fat{
 	public:
 		Fat();
@@ -16,7 +15,6 @@ class Fat{
 		void setFileName(std::string fileName);
 	private:
 		std::vector<Node> nodes;
-		std::string fileName;
 };	
 
 Fat::Fat(){
@@ -36,13 +34,4 @@ std::vector<Node>& Fat::getNodes() {
 void Fat::setNodes(std::vector<Node> nodes) { //pass in reference to make it faster, const so it doesnt get modified.
 	this->nodes = nodes;
 }
-
-std::string Fat::getFileName() {
-	return fileName;
-}
-
-void Fat::setFileName(std::string fileName) {
-	this->fileName = fileName;
-}
-
 #endif 

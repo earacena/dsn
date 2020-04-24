@@ -1,10 +1,10 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <vector>		//data storage
+#include <vector>		//blocks vector
 #include "fat.cpp"		//fat
-#include "block.cpp"		//block data
-//class Fat;
+#include "block.cpp"	//block data
+
 class Node{
 	public:
 		Node(int nodeNumber);
@@ -20,10 +20,10 @@ class Node{
 	private:
 		int nodeNumber;
 		std::vector<Block> blocks;
-		//Fat* fat;
 		Fat fat;
 };
 
+//constructors
 Node::Node(int nodeNumber) {
 	this->nodeNumber = nodeNumber;
 }
@@ -35,6 +35,11 @@ Node::Node(int nodeNumber, std::string userInput) {
 	Fat fat();
 }
 
+//functions
+void Node::pushBackBlock(Block b) {
+	this->blocks.push_back(b);
+}
+
 //getters and setters
 int Node::getNodeNumber() {
 	return nodeNumber;
@@ -43,10 +48,6 @@ int Node::getNodeNumber() {
 void Node::setNodeNumber(int nodeNumber) {
 	this->nodeNumber = nodeNumber;
 }
-
-/*Block Node::getBlock() {
-	return this->block;
-}*/
 
 std::vector<Block>& Node::getBlocks() {	
 	return blocks;
