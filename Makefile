@@ -1,4 +1,4 @@
-OBJS = main.cpp 
+OBJS = main.cpp Listener.cpp Requester.cpp 
 FLAGS = -g -Wall -pedantic -pthread
 EXEC = node
 #LIBS = 
