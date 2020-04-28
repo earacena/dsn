@@ -113,6 +113,8 @@ void Listener::run() {
       response = server_buf;
       response = response.substr(0, value);
 
+
+      // Two-way buffer size handshake
       if (response.substr(0,1) == "$") {
         client_buf_size = std::stoi(response.substr(1, response.find('_')-1));
         
@@ -124,7 +126,14 @@ void Listener::run() {
   
         send(sock, size_message, strlen(size_message), 0);
       }
-  
+
+      // Receiving FAT
+      //if (response.substr(0, 1) == "^") {
+        
+
+      //}
+      
+      // Block fetch/transmission
       if (response.substr(0,1) == "?") {
         std::string requested = response.substr(1, response.find('_')-1);
         std::cout << "[Listener] Requested block name/hash: " << requested << std::endl;
@@ -191,7 +200,7 @@ void Listener::run() {
   
         file.close();
   
-      }
+      } 
     }
   
   }

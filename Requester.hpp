@@ -19,12 +19,24 @@
 #include <unistd.h> 
 #include <string.h> 
 
+struct Request {
+  std::string type = "";
+  
+  std::string target_address = "";
+  int target_port = 0;
+
+  // type: fat_distrib
+  std::vector<std::string> fat_copy;
+
+  // type: block_distrib/transmission
+
+};
 
 class Requester {
 public:
   Requester();
 
-  void run(const std::string & target_address, const int target_port, const std::string & target_block);
+  void run(const Request & request);
 
 private:
 
