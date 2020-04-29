@@ -18,12 +18,12 @@ While inside the main directory of the project, type:
 ```
 
 #### Running
-Perform these steps in order:
+*Perform these steps in order*
 
 Open three terminals, and they will be refered to as "terminal 1", "terminal 2",
 and "terminal 3" respectively.
 
-In terminal 2,:
+In terminal 2:
 
 ```
 cd node2
