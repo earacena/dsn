@@ -12,6 +12,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
 
 // Serverside libraries
 #include <unistd.h> 

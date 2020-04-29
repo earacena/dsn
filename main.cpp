@@ -25,26 +25,7 @@ void run_client(const Request & request) {
   requester.run(request);
 }
 
-
-
-int main(int argc, const char **argv) {
-
-  // Check if FAT file exists
-  std::ifstream fat_file("./FAT/backup.txt");
-
-  //if (!fat_file.is_open()) {
-  //  std::cout << "[Error] FAT table file missing. Exiting..." << std::endl;
-  //  return 0;
-  //}
-
-  std::vector<std::string> fat;
-  fat.reserve(10);
-
-  std::string line = "";
-  // Load FAT into memory
-  while(std::getline(fat_file, line))
-    fat.push_back(line);
-  
+int main() {
   // Get port, and all the nodes
   std::ofstream nodes_list("./nodes.txt");
 
@@ -85,6 +66,25 @@ int main(int argc, const char **argv) {
   std::cin >> response;
 
   if (response == "y") {  
+    // Check if FAT file exists
+    std::ifstream fat_file("./backup.txt");
+
+    if (!fat_file.is_open()) {
+      std::cout << "[Error] FAT table file missing. Exiting..." << std::endl;
+      return 0;
+    }
+
+    std::vector<std::string> fat;
+    fat.reserve(10);
+
+    std::string line = "";
+    // Load FAT into memory
+    while(std::getline(fat_file, line))
+      fat.push_back(line);
+
+
+
+  
     Request send_fat_to_node2;
     Request send_fat_to_node3;
   

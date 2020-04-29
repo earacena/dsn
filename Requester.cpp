@@ -66,7 +66,8 @@ void Requester::run(const Request & request) {
   response = client_buf;
   response = response.substr(0, msg_size);
 
-  std::cout << "[Requester] node reply: " << response << std::endl;
+  std::cout << "[Requester] node (" << request.target_address << ", " << request.target_port 
+            << ") reply: " << response << std::endl;
 
   // If not in reply format
   if (!valid_reply_form(response)) {
@@ -86,14 +87,19 @@ void Requester::run(const Request & request) {
 
 
   if (request.type == "fat_distrib") {
+    std::cout << "\n[Listener] Distributing FAT to node (" << request.target_address << ", " 
+              << request.target_port << ")..." << std::endl;
     std::string data = "";
 
-    for (std::string entry : request.fat_copy)
-      data = data + entry + '\n';
-    
+    for (std::string line : request.fat_copy) {
+      data = data + line.substr(0, line.size()-1) + '*';
+    }
+ 
+    std::cout << "[debug] string data: " << data << std::endl;
+
     // Chunk the data
      
-    if (data.length()+1 > server_buf_size) {
+    if (data.length()+2 > server_buf_size) {
       // Split block into chunks of client buffer size (minus two for the >..._ reply form and 
       // terminating underscore)
       std::vector<std::string> chunks;
@@ -118,13 +124,20 @@ void Requester::run(const Request & request) {
       // for debug
       std::cout << "Data: " << data;
       for (std::string & chunk : chunks)
-        std::cout << "\tChunk: " << chunk << std::endl;
+        std::cout << "\n\tChunk: " << chunk;
+
+      std::cout << std::endl;
     
       // send
       for (std::string & chunk : chunks) {
         send(sock, chunk.c_str(), strlen(chunk.c_str()), 0);
       }
 
+    } else {
+      std::string block = std::string("^") + data + "_";
+      block = block.substr(0, server_buf_size);
+      std::cout << "[Listener] Sending data:" << block << std::endl; 
+      send(sock, block.c_str(), strlen(block.c_str()), 0);
     }
 
     std::cout << "[Requester] FAT transmission complete. Exiting..." << std::endl;
