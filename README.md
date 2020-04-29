@@ -14,7 +14,7 @@ A decentralized storage network built on a blockchain and P2P network.
 While inside the main directory of the project, type:
 
 ```
-make
+./setup.sh
 ```
 
 #### Running
