@@ -46,6 +46,7 @@ cd node3
 In terminal 1:
 
 ```
+cd node1
 ./FAT/fat
 >> 1
 >> 2 
