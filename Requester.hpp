@@ -12,6 +12,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <stdio.h> 
 #include <sys/socket.h> 
@@ -19,15 +20,29 @@
 #include <unistd.h> 
 #include <string.h> 
 
+struct Request {
+  std::string type = "";
+  
+  std::string target_address = "";
+  int target_port = 0;
+
+  // type: fat_distrib
+  std::vector<std::string> fat_copy;
+
+  // type: block_distrib/transmission
+  std::string target_block = "";
+};
 
 class Requester {
 public:
   Requester();
 
-  void run(const std::string & target_address, const int target_port, const std::string & target_block);
+  void run(const Request & request);
 
 private:
-
+  std::string receive_block(int sock, char client_buf[], int client_buf_size);
+  std::vector<std::string> chunkify_data(const std::string & data, int server_buf_size, 
+                                         const std::string & mode);
 
 };
 

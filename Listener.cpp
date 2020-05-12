@@ -113,6 +113,8 @@ void Listener::run() {
       response = server_buf;
       response = response.substr(0, value);
 
+
+      // Two-way buffer size handshake
       if (response.substr(0,1) == "$") {
         client_buf_size = std::stoi(response.substr(1, response.find('_')-1));
         
@@ -124,7 +126,102 @@ void Listener::run() {
   
         send(sock, size_message, strlen(size_message), 0);
       }
+
+      // Receiving FAT
+      if (response.substr(0, 1) == "^") {
+        // Multi-chunk transmission
+        if (response.substr(response.length()-1,1) == "&") {
+          for (char & ch : server_buf)
+            ch = 0;
+          int msg_size = recv(sock, server_buf, server_buf_size, 0);
+          response = server_buf;
+          response = response.substr(0, msg_size);  
+          
+          std::cout << "[Listener] Message received: " << response << std::endl;
+          
+          if (!valid_transmit_form(response)) {
+            std::cout << "[Listener] Invalid reply format. Exiting listening thread..." << std::endl;
+            return;
+          }
+          
+          std::vector<std::string> chunks;
+          chunks.reserve(15);
+          
+          chunks.push_back(response);
+          
+          while ((response.substr(0,1) == "&" || response.substr(response.length()-1, 1) == "&") && 
+                 (response.substr(response.length()-1, 1) != "_")) {
+            for (char & ch : server_buf)
+              ch = 0;
+            msg_size = recv(sock, server_buf, server_buf_size, 0);
+            response = server_buf;
+            response = response.substr(0, msg_size);
+          
+            std::cout << "[Listener] Chunk received: " << response << std::endl;
+            chunks.push_back(response);
+          }
+          
+          // process chunks, extract data
+          for (std::string & chunk : chunks)
+            chunk = chunk.substr(1, chunk.length()-2);
+          
+          std::string data = "";
   
+          for (std::string & chunk : chunks)
+            data = data + chunk;
+          
+          std::cout << "[Listener] Combined FAT chunks received: " << data << std::endl;
+
+          // swap '*' for newlines
+          std::vector<std::string> fat;
+          fat.reserve(10);
+          
+          response = response.substr(1, response.length()-2);
+          std::istringstream sstr(response);
+          std::string line;
+          while (std::getline(sstr, line, '*')) {
+            fat.push_back(line + '\n');
+          }
+
+          std::cout << "[Listener] FAT: \n";
+          for (std::string & line : fat)
+            std::cout << line;
+
+          std::ofstream fat_file("./backup.txt");
+          for (std::string & line : fat)
+            fat_file << line;
+          fat_file.close();
+
+          std::cout << "[Listener] FAT stored (\"./backup.txt\")." << std::endl;
+
+        } else {
+
+          // single chunk transmission
+          // swap '*' for newlines
+          std::vector<std::string> fat;
+          fat.reserve(10);
+          
+          response = response.substr(1, response.length()-2);
+          std::istringstream sstr(response);
+          std::string line;
+          while (std::getline(sstr, line, '*')) {
+            fat.push_back(line + '\n');
+          }
+          std::cout << "[Listener] FAT: \n";
+          for (std::string & line : fat)
+            std::cout << line;
+
+          std::ofstream fat_file("./backup.txt");
+          for (std::string & line : fat)
+            fat_file << line;
+          fat_file.close();
+
+          std::cout << "[Listener] FAT stored (\"./backup.txt\")." << std::endl;
+        }
+
+      }
+      
+      // Block fetch/transmission
       if (response.substr(0,1) == "?") {
         std::string requested = response.substr(1, response.find('_')-1);
         std::cout << "[Listener] Requested block name/hash: " << requested << std::endl;
@@ -191,7 +288,7 @@ void Listener::run() {
   
         file.close();
   
-      }
+      } 
     }
   
   }
