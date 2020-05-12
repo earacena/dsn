@@ -96,13 +96,13 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 	}
 	splitStrings.clear();
 }
-void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, string fileName) {	//work in progress
+void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string fileName) {	//work in progress
 
 }
 void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, int userInput) {	//in progress, create destructors
-	nodes[userInput].clear();
+	nodes[userInput].getBlocks().clear();
 	for (int i = 0; i < nodes.size(); i++) {
-		if(nodes[i].getBlocks())
+		//if(nodes[i].getBlocks());
 	}
 }
 //print
@@ -112,7 +112,7 @@ void printFatContent(std::vector<Node> &nodes){	//properly working
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
 			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
-				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10) << nodes[i].getBlocks()[j].getFileName(); //<< " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
+				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10) << nodes[i].getBlocks()[j].getFileName() << std::endl; //<< " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
 			}
 		}
 	}
@@ -151,7 +151,7 @@ void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 	std::string line, fileName;
 	int nodeNumber, blockNumber, counter = 0;
 
-	//node number, filename block filename block filename block 
+	//node number, filename block filename block filename block
 	myFile.open(filename);
 	if (myFile) {
 		while (getline(myFile, line)) {
@@ -177,9 +177,9 @@ void exportFat(std::vector<Node> &nodes){
 	printNice("Exporting File Allocation Table as backup.txt");
 	std::ofstream myFile;
 	myFile.open("backup.txt");
-	
+
 	//similar to the print function, just outputs.
-	for (int i = 0; i < nodes.size(); i++) {	//prints node number, file name, then block number 
+	for (int i = 0; i < nodes.size(); i++) {	//prints node number, file name, then block number
 		myFile << nodes[i].getNodeNumber() << " ";
 		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
 			myFile << nodes[i].getBlocks()[j].getFileName() << " " << j << " "; //<< nodes[i].getBlocks()[j].getData() << " ";
@@ -260,11 +260,28 @@ int main (int argc, char *argv[]){
                         printNice("Enter the name of the file you want to search for, and q to stop");
                         std::cin >> userInput;
                         if(userInput != "q"){
+
                             //printCombinedFile(nodes, table, userInput, numFiles);
-							printNice("Found the file, but the FAT structure changed so it isn't displayed.")
+							printNice("Found the file, but the FAT structure changed so it isn't displayed.");
+
+
+							std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
+                            std::string s;
+                            int nodeNumber, blockNumber;
+                            for(int i=0;i<numFiles;i++){
+                                nodeNumber = it->second.first;
+                                blockNumber =  it->second.second;
+                                //std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
+                                s += nodes[it->second.first].getBlocks()[it->second.second].getData();
+                                it++;
+                            }
+                            std::cout << "The combined file " << userInput << " is: " << s << std::endl;
+
+
+							if()
                         }
 						else {
-							printNice("Did not find file");
+							printNice("Quitting command");
 							break;
 						}
                     }
@@ -276,7 +293,7 @@ int main (int argc, char *argv[]){
 			case 6:
 				printNice("Enter the name of the file you want to delete");
 				std::cin >> userChoice;
-				deleteBlock(userChoice);
+				deleteBlock(nodes, table, userChoice);
 				break;
 			case 7:
 				printNice("Clearing File Allocation Table");

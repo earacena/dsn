@@ -8,25 +8,26 @@ class Block{
 		Block(std::string userInput, std::string fileName);
 
 		//getters and setters
-		std::string getData();		
-		void setData(std::string data);	
+		std::string getData();
+		void setData(std::string data);
 		std::string getFileName();
 		void setFileName(std::string fileName);
 	private:
 		//std::string data;
 		std::string fileName;
-};	
+};
 
-Block::Block(){
-	this->data = "bleh";
+Block::Block(){ //just here, shouldnt be used
+	//this->data = "bleh";
+	this->fileName = "temp";
 }
 
 Block::Block(std::string userInput) {
-	this->fileName = userInput;	
+	this->fileName = userInput;
 }
 
 /*Block::Block(std::string userInput, std::string fileName) {
-	this->data = userInput;	
+	this->data = userInput;
 	this->fileName = fileName;
 }*/
 
@@ -47,4 +48,4 @@ void Block::setFileName(std::string fileName) {
 	this->fileName = fileName;
 }
 
-#endif 
+#endif
