@@ -93,7 +93,32 @@ void Requester::run(const Request & request) {
 
     // Chunk the data
     if (data.length()+2 > server_buf_size) {
-      std::vector<std::string> chunks = chunkify_data(data, server_buf_size, mode); 
+      std::vector<std::string> chunks;
+      chunks.reserve(data.size()/server_buf_size-2);
+      int chunk_size = server_buf_size-2;
+      for (int i = 0; i < data.length(); i += chunk_size) 
+      chunks.push_back(data.substr(i, chunk_size));
+  
+      std::string symbol = "^";
+ 
+      // Conform to reply format
+      for (int i = 0; i < chunks.size(); ++i) {
+        if (i == 0)
+          chunks[0] = symbol + chunks[0] + "&";
+        // last element
+        else if (i == chunks.size()-1)
+          chunks[i] = std::string("&") + chunks[i] + "_";
+        else
+          chunks[i] = std::string("&") + chunks[i] + "&";
+      }
+
+      // debug
+      std::cout << "Data: " << data;
+      for (std::string & chunk : chunks)
+        std::cout << "\n\tChunk: " << chunk;
+  
+      std::cout << std::endl;
+   
 
       // send
       for (std::string & chunk : chunks) 
@@ -107,7 +132,7 @@ void Requester::run(const Request & request) {
     }
 
     std::cout << "[Requester] FAT transmission complete. Exiting..." << std::endl;
-  
+ 
   } else if (request.type == "block_transmit") {
 
     std::cout << request.target_block << std::endl;
@@ -117,7 +142,49 @@ void Requester::run(const Request & request) {
     const char * request_message = block_request_message.c_str();
     send(sock, request_message, strlen(request_message), 0);
   
-    std::string data = receive_block(sock, client_buf, client_buf_size);    
+    for (char & ch : client_buf)
+      ch = 0;
+
+    int msg_size = recv(sock, client_buf, client_buf_size, 0);
+    std::string response = client_buf;
+    response = response.substr(0, msg_size);  
+
+    std::cout << "[Requester] Message received: " << response << std::endl;
+
+    if (!valid_transmit_form(response)) {
+      std::cout << "[Requester] Invalid reply format. Exiting client thread..." << std::endl;
+      return;
+    }
+
+    std::vector<std::string> chunks;
+    chunks.reserve(15);
+
+    chunks.push_back(response);
+
+    while ((response.substr(0,1) == "&" || response.substr(response.length()-1, 1) == "&") && 
+          (response.substr(response.length()-1, 1) != "_")) {
+      
+      for (char & ch : client_buf)
+        ch = 0;
+    
+      msg_size = recv(sock, client_buf, client_buf_size, 0);
+      response = client_buf;
+      response = response.substr(0, msg_size);
+
+      std::cout << "[Requester] Chunk received: " << response << std::endl;
+      chunks.push_back(response);
+    }
+
+    // process chunks, extract data
+    for (std::string & chunk : chunks)
+      chunk = chunk.substr(1, chunk.length()-2);
+
+    std::string data = "";
+
+    for (std::string & chunk : chunks)
+    data = data + chunk;
+
+    std::cout << "[Requester] Block received: " << data << std::endl;  
 
   } else {
     std::cout << "[Requester] Unrecognized request type: " << request.type << " ..." << std::endl;
@@ -128,86 +195,3 @@ void Requester::run(const Request & request) {
 
 }
 
-std::string Receiver::receive_block() {
-  for (char & ch : client_buf)
-    ch = 0;
-  int msg_size = recv(sock, client_buf, client_buf_size, 0);
-  std::string response = client_buf;
-  response = response.substr(0, msg_size);  
-
-  std::cout << "[Requester] Message received: " << response << std::endl;
-
-  if (!valid_transmit_form(response)) {
-    std::cout << "[Requester] Invalid reply format. Exiting client thread..." << std::endl;
-    return;
-  }
-
-  std::vector<std::string> chunks;
-  chunks.reserve(15);
-
-  chunks.push_back(response);
-
-  while ((response.substr(0,1) == "&" || response.substr(response.length()-1, 1) == "&") && 
-         (response.substr(response.length()-1, 1) != "_")) {
-    for (char & ch : client_buf)
-      ch = 0;
-    msg_size = recv(sock, client_buf, client_buf_size, 0);
-    response = client_buf;
-    response = response.substr(0, msg_size);
-
-    std::cout << "[Requester] Chunk received: " << response << std::endl;
-    chunks.push_back(response);
-  }
-
-  // process chunks, extract data
-  for (std::string & chunk : chunks)
-    chunk = chunk.substr(1, chunk.length()-2);
-
-  std::string data = "";
-
-  for (std::string & chunk : chunks)
-    data = data + chunk;
-
-  std::cout << "[Requester] Block received: " << data << std::endl;
-
-  return data;
-}
-
-
-std::vector<std::string> Receiver::chunkify_data(const std::string & data, int server_buf_size,
-                                                 const std::string & mode) {
-  std::vector<std::string> chunks;
-  chunks.reserve(data.size()/server_buf_size-2);
-  int chunk_size = server_buf_size-2;
-  for (int i = 0; i < data.length(); i += chunk_size) 
-    chunks.push_back(data.substr(i, chunk_size));
-  
-  std::string symbol = "";
-  if (mode == "fat")
-    symbol = "^";
-  else if (mode == "file")
-    symbol = "%";
-  else
-    symbol = ">";
-  
-  // Conform to reply format
-  for (int i = 0; i < chunks.size(); ++i) {
-    if (i == 0)
-      chunks[0] = symbol + chunks[0] + "&";
-    // last element
-    else if (i == chunks.size()-1)
-      chunks[i] = std::string("&") + chunks[i] + "_";
-    else
-      chunks[i] = std::string("&") + chunks[i] + "&";
-  }
-
-  // debug
-  std::cout << "Data: " << data;
-  for (std::string & chunk : chunks)
-    std::cout << "\n\tChunk: " << chunk;
-  
-  std::cout << std::endl;
-  
-  return chunks;
-
-}

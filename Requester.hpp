@@ -40,9 +40,7 @@ public:
   void run(const Request & request);
 
 private:
-  std::string receive_block(int sock, char client_buf[], int client_buf_size);
-  std::vector<std::string> chunkify_data(const std::string & data, int server_buf_size, 
-                                         const std::string & mode);
+
 
 };
 
