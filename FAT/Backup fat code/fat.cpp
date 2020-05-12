@@ -13,7 +13,7 @@ class Fat{
 		void setNodes(std::vector<Node> nodes);
 	private:
 		std::vector<Node> nodes;
-		std::string fileName;	//we dont use this.
+		std::string fileName;
 };	
 
 Fat::Fat(){

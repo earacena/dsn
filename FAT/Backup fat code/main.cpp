@@ -91,19 +91,10 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 
 	for (int i = 0; i < splitStrings.size(); i++) {
 		table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
-		Block b(fileName);
+		Block b(splitStrings[i], fileName);
 		nodes[temp[i]].pushBackBlock(b);
 	}
 	splitStrings.clear();
-}
-void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, string fileName) {	//work in progress
-
-}
-void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, int userInput) {	//in progress, create destructors
-	nodes[userInput].clear();
-	for (int i = 0; i < nodes.size(); i++) {
-		if(nodes[i].getBlocks())
-	}
 }
 //print
 void printFatContent(std::vector<Node> &nodes){	//properly working
@@ -112,7 +103,8 @@ void printFatContent(std::vector<Node> &nodes){	//properly working
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
 			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
-				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10) << nodes[i].getBlocks()[j].getFileName(); //<< " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
+				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10)  << nodes[i].getBlocks()[j].getFileName() << " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
+				//std::cout << std::setw(space) << " " << "file name: " << nodes[i].getFat().getNodes()[i].getFileName() <<" content: " << nodes[i].getBlocks()[j].getData() << std::endl;
 			}
 		}
 	}
@@ -131,7 +123,7 @@ void printMap(std::multimap<std::string, std::pair<int, int>> &table) {
         printNice("Please set up the File Allocation Table first");
     }
 }
-/*void printCombinedFile(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::string userInput, int numFiles){
+void combineFile(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::string userInput, int numFiles){
     std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
     std::string s;
     int nodeNumber, blockNumber;
@@ -143,15 +135,14 @@ void printMap(std::multimap<std::string, std::pair<int, int>> &table) {
         it++;
     }
     std::cout << "The combined file " << userInput << " is: " << s << std::endl;
-}*/
+}
 //importing and exporting
 void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 	printNice("Importing File Allocation Table from file");
 	std::ifstream myFile;
-	std::string line, fileName;
+	std::string line, content;
 	int nodeNumber, blockNumber, counter = 0;
 
-	//node number, filename block filename block filename block 
 	myFile.open(filename);
 	if (myFile) {
 		while (getline(myFile, line)) {
@@ -160,8 +151,8 @@ void importFat(std::vector<Node> &nodes, std::string filename){	//not working
 
 			Node temp(nodeNumber);
 			nodes.push_back(temp);
-			while (iss >> blockNumber >> fileName) {
-				Block b(fileName);
+			while (iss >> blockNumber >> content) {
+				Block b(content);
 				nodes[counter].getBlocks().push_back(b);
 			}
 			counter++;
@@ -177,12 +168,11 @@ void exportFat(std::vector<Node> &nodes){
 	printNice("Exporting File Allocation Table as backup.txt");
 	std::ofstream myFile;
 	myFile.open("backup.txt");
-	
 	//similar to the print function, just outputs.
-	for (int i = 0; i < nodes.size(); i++) {	//prints node number, file name, then block number 
+	for (int i = 0; i < nodes.size(); i++) {	//iterates through each block, its the block number
 		myFile << nodes[i].getNodeNumber() << " ";
 		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
-			myFile << nodes[i].getBlocks()[j].getFileName() << " " << j << " "; //<< nodes[i].getBlocks()[j].getData() << " ";
+			myFile << nodes[i].getBlocks()[j].getFileName() << " " << j << " " << nodes[i].getBlocks()[j].getData() << " ";
 		}
 		myFile << std::endl;
 	}
@@ -206,7 +196,7 @@ int main (int argc, char *argv[]){
 
 	while (true)
 	{
-		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Search File, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT" << RESET << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Search file, 7: Clear FAT, 8: Import FAT, 9: Export FAT" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
@@ -260,24 +250,15 @@ int main (int argc, char *argv[]){
                         printNice("Enter the name of the file you want to search for, and q to stop");
                         std::cin >> userInput;
                         if(userInput != "q"){
-                            //printCombinedFile(nodes, table, userInput, numFiles);
-							printNice("Found the file, but the FAT structure changed so it isn't displayed.")
+                            combineFile(nodes, table, userInput, numFiles);
                         }
-						else {
-							printNice("Did not find file");
-							break;
-						}
+                        else break;
                     }
                 }
                 else{
-                    printNice("Please set up the File Allocation Table first");
+                    printNice("Please set up the File Allocation Table first")
                 }
                 break;
-			case 6:
-				printNice("Enter the name of the file you want to delete");
-				std::cin >> userChoice;
-				deleteBlock(userChoice);
-				break;
 			case 7:
 				printNice("Clearing File Allocation Table");
 				nodes.clear();
