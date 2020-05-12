@@ -271,7 +271,7 @@ int main (int argc, char *argv[]){
                     }
                 }
                 else{
-                    printNice("Please set up the File Allocation Table first")
+                    printNice("Please set up the File Allocation Table first");
                 }
                 break;
 			case 7:
