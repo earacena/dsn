@@ -265,7 +265,7 @@ int main (int argc, char *argv[]){
 							printNice("Found the file, but the FAT structure changed so it isn't displayed.");
 
 
-							std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
+							/*std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
                             std::string s;
                             int nodeNumber, blockNumber;
                             for(int i=0;i<numFiles;i++){
@@ -275,10 +275,10 @@ int main (int argc, char *argv[]){
                                 s += nodes[it->second.first].getBlocks()[it->second.second].getData();
                                 it++;
                             }
-                            std::cout << "The combined file " << userInput << " is: " << s << std::endl;
+                            std::cout << "The combined file " << userInput << " is: " << s << std::endl;*/
 
 
-							if()
+							//if()
                         }
 						else {
 							printNice("Quitting command");
