@@ -28,20 +28,22 @@ struct Request {
 
   // type: fat_distrib
   std::vector<std::string> fat_copy;
+  
+  // type: nodes_distrib
+  std::vector<std::string> nodes_copy;
 
-  // type: block_distrib/transmission
+  // type: block_fetch, used for fetching single blocks (fetch)
   std::string target_block = "";
 };
 
 class Requester {
 public:
   Requester();
-
   void run(const Request & request);
 
 private:
 
-
+  std::ofstream log_file_;
 };
 
 

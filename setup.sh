@@ -7,7 +7,7 @@ rm -r node1;
 rm -r node2;
 rm -r node3;
 
-# Compile main directory code
+# Compile main directory code (node)
 make;
 
 # Compile FAT code

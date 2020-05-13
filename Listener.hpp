@@ -28,13 +28,14 @@ class Listener {
 public:
   Listener();
   Listener(const int server_port);
-
+  ~Listener();
   void run();
 
 private:
   // 1111 is default port if not assigned, assigning is reccommended
   // to prevent errors using alreadly allocated ports
   int server_port_ = 1111;
+  std::ofstream log_file_;
 
 };
 

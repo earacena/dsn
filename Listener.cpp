@@ -8,7 +8,14 @@
 
 Listener::Listener() { }
 
-Listener::Listener(const int server_port) { server_port_ = server_port; }
+Listener::Listener(const int server_port) { 
+  log_file_.open("log.txt");
+  server_port_ = server_port; 
+}
+
+Listener::~Listener() {
+  log_file_.close();
+}
 
 
 // Helper
@@ -47,7 +54,7 @@ bool valid_transmit_form(const std::string & response) {
 
 void Listener::run() {
 
-  std::cout << "[Listener] Initializing server..." << std::endl;
+  log_file_ << "[Listener] Initializing server..." << std::endl;
 
   int server_fd, sock, value;
   struct sockaddr_in address;
@@ -80,7 +87,7 @@ void Listener::run() {
     exit(EXIT_FAILURE);
   }
 
-  std::cout << "[Listener] Waiting for requests..." << std::endl;
+  log_file_ << "[Listener] Waiting for requests..." << std::endl;
 
   // listen on port
   if (listen(server_fd, 3) < 0) {
@@ -105,11 +112,11 @@ void Listener::run() {
  
       value = recv(sock, server_buf, server_buf_size, 0);
       if (value == 0) {
-        std::cout << "[Listener] Remote host terminated connection. Exiting..." << std::endl;
+        log_file_ << "[Listener] Remote host terminated connection. Exiting..." << std::endl;
         exit(0);
       }
 
-      std::cout << "[Listener] Message [" << value << "]: " << server_buf << std::endl;
+      log_file_ << "[Listener] Message [" << value << "]: " << server_buf << std::endl;
       response = server_buf;
       response = response.substr(0, value);
 
@@ -122,7 +129,7 @@ void Listener::run() {
         std::string buffer_size_message = std::string(">") + std::to_string(server_buf_size) + "_";
         const char * size_message = buffer_size_message.c_str();
    
-        std::cout << "[Listener] Sending buffer size message to node: " << buffer_size_message << std::endl;
+        log_file_ << "[Listener] Sending buffer size message to node: " << buffer_size_message << std::endl;
   
         send(sock, size_message, strlen(size_message), 0);
       }
@@ -137,10 +144,10 @@ void Listener::run() {
           response = server_buf;
           response = response.substr(0, msg_size);  
           
-          std::cout << "[Listener] Message received: " << response << std::endl;
+          log_file_ << "[Listener] Message received: " << response << std::endl;
           
           if (!valid_transmit_form(response)) {
-            std::cout << "[Listener] Invalid reply format. Exiting listening thread..." << std::endl;
+            log_file_ << "[Listener] Invalid reply format. Exiting listening thread..." << std::endl;
             return;
           }
           
@@ -157,7 +164,7 @@ void Listener::run() {
             response = server_buf;
             response = response.substr(0, msg_size);
           
-            std::cout << "[Listener] Chunk received: " << response << std::endl;
+            log_file_ << "[Listener] Chunk received: " << response << std::endl;
             chunks.push_back(response);
           }
           
@@ -170,7 +177,7 @@ void Listener::run() {
           for (std::string & chunk : chunks)
             data = data + chunk;
           
-          std::cout << "[Listener] Combined FAT chunks received: " << data << std::endl;
+          log_file_ << "[Listener] Combined FAT chunks received: " << data << std::endl;
 
           // swap '*' for newlines
           std::vector<std::string> fat;
@@ -183,16 +190,16 @@ void Listener::run() {
             fat.push_back(line + '\n');
           }
 
-          std::cout << "[Listener] FAT: \n";
+          log_file_ << "[Listener] FAT: \n";
           for (std::string & line : fat)
-            std::cout << line;
+            log_file_ << line;
 
           std::ofstream fat_file("./backup.txt");
           for (std::string & line : fat)
             fat_file << line;
           fat_file.close();
 
-          std::cout << "[Listener] FAT stored (\"./backup.txt\")." << std::endl;
+          log_file_ << "[Listener] FAT stored (\"./backup.txt\")." << std::endl;
 
         } else {
 
@@ -207,29 +214,127 @@ void Listener::run() {
           while (std::getline(sstr, line, '*')) {
             fat.push_back(line + '\n');
           }
-          std::cout << "[Listener] FAT: \n";
+          log_file_ << "[Listener] FAT: \n";
           for (std::string & line : fat)
-            std::cout << line;
+            log_file_ << line;
 
           std::ofstream fat_file("./backup.txt");
           for (std::string & line : fat)
             fat_file << line;
           fat_file.close();
 
-          std::cout << "[Listener] FAT stored (\"./backup.txt\")." << std::endl;
+          log_file_ << "[Listener] FAT stored (\"./backup.txt\")." << std::endl;
         }
-
+        
+        break;
       }
       
-      // Block fetch/transmission
+      // nodes.txt transmission
+      if (response.substr(0, 1) == "@") {
+        // Multi-chunk transmission
+        if (response.substr(response.length()-1,1) == "&") {
+          for (char & ch : server_buf)
+            ch = 0;
+          int msg_size = recv(sock, server_buf, server_buf_size, 0);
+          response = server_buf;
+          response = response.substr(0, msg_size);  
+          
+          log_file_ << "[Listener] Message received: " << response << std::endl;
+          
+          if (!valid_transmit_form(response)) {
+            log_file_ << "[Listener] Invalid reply format. Exiting listening thread..." << std::endl;
+            return;
+          }
+          
+          std::vector<std::string> chunks;
+          chunks.reserve(15);
+          
+          chunks.push_back(response);
+          
+          while ((response.substr(0,1) == "&" || response.substr(response.length()-1, 1) == "&") && 
+                 (response.substr(response.length()-1, 1) != "_")) {
+            for (char & ch : server_buf)
+              ch = 0;
+            msg_size = recv(sock, server_buf, server_buf_size, 0);
+            response = server_buf;
+            response = response.substr(0, msg_size);
+          
+            log_file_ << "[Listener] Chunk received: " << response << std::endl;
+            chunks.push_back(response);
+          }
+          
+          // process chunks, extract data
+          for (std::string & chunk : chunks)
+            chunk = chunk.substr(1, chunk.length()-2);
+          
+          std::string data = "";
+  
+          for (std::string & chunk : chunks)
+            data = data + chunk;
+          
+          log_file_ << "[Listener] Combined nodes.txt chunks received: " << data << std::endl;
+
+          // swap '*' for newlines
+          std::vector<std::string> nodes;
+          nodes.reserve(10);
+          
+          response = response.substr(1, response.length()-2);
+          std::istringstream sstr(response);
+          std::string line;
+          while (std::getline(sstr, line, '*')) {
+            nodes.push_back(line + '\n');
+          }
+
+          log_file_ << "[Listener] nodes.txt: \n";
+          for (std::string & line : nodes)
+            log_file_ << line;
+
+          std::ofstream nodes_file("./nodes.txt");
+          for (std::string & line : nodes)
+            nodes_file << line;
+          nodes_file.close();
+
+          log_file_ << "[Listener] nodes.txt stored (\"./nodes.txt\")." << std::endl;
+
+        } else {
+
+          // single chunk transmission
+          // swap '*' for newlines
+          std::vector<std::string> nodes;
+          nodes.reserve(10);
+          
+          response = response.substr(1, response.length()-2);
+          std::istringstream sstr(response);
+          std::string line;
+          while (std::getline(sstr, line, '*')) {
+            nodes.push_back(line + '\n');
+          }
+          log_file_ << "[Listener] nodes.txt: \n";
+          for (std::string & line : nodes)
+            log_file_ << line;
+
+          std::ofstream nodes_file("./nodes.txt");
+          for (std::string & line : nodes)
+            nodes_file << line;
+          nodes_file.close();
+
+          log_file_ << "[Listener] nodes.txt stored (\"./nodes.txt\")." << std::endl;
+        }
+
+
+        break;
+      }
+      
+      
+      // Block fetch
       if (response.substr(0,1) == "?") {
         std::string requested = response.substr(1, response.find('_')-1);
-        std::cout << "[Listener] Requested block name/hash: " << requested << std::endl;
+        log_file_ << "[Listener] Requested block name/hash: " << requested << std::endl;
         std::string filename = "./" + requested;
         std::ifstream file(filename, std::ios::binary);
   
         if (!file.good()) {
-          std::cout << "[Listener] Requested block not found." << std::endl;       
+          log_file_ << "[Listener] Requested block not found." << std::endl;       
           char * not_found_message = ">badblock_";
           send(sock, not_found_message, strlen(not_found_message), 0);
           return;
@@ -237,7 +342,7 @@ void Listener::run() {
     
         std::string data = "";
         if (!file.is_open()) {
-          std::cout << "[Listener] Error opening file: " << requested << std::endl;
+          log_file_ << "[Listener] Error opening file: " << requested << std::endl;
         } else {
           std::string current = "";
           std::string data = "";
@@ -268,9 +373,9 @@ void Listener::run() {
                 chunks[i] = std::string("&") + chunks[i] + "&";
             }
             // for debug
-            std::cout << "Data: " << data << std::endl;
+            log_file_ << "Data: " << data << std::endl;
             for (std::string & chunk : chunks)
-              std::cout << "\tChunk: " << chunk << std::endl;
+              log_file_ << "\tChunk: " << chunk << std::endl;
 
             // send
             for (std::string & chunk : chunks) {
@@ -281,13 +386,13 @@ void Listener::run() {
             // Send message in single transmission
             std::string block = std::string(">") + data + "_";
             block = block.substr(0, client_buf_size);
-            std::cout << "[Listener] Sending data:" << block << std::endl; 
+            log_file_ << "[Listener] Sending data:" << block << std::endl; 
             send(sock, block.c_str(), strlen(block.c_str()), 0);
           }
         }
   
         file.close();
-  
+        break;
       } 
     }
   
