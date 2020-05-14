@@ -81,7 +81,8 @@ void split(std::vector<std::string> &vecToPopulate, std::string stringToSplit, i
 }
 //populate Fat
 void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName){
-	std::vector<int> temp;	//the order of temp is where the blocks in splitStrings will go
+	//block shuffling - the order of temp is where the strings in splitStrings will go
+	std::vector<int> temp;	
 	int counter = 0;
 	for (int i = 0; i < splitStrings.size(); i++) {
 		temp.push_back(i);
@@ -90,10 +91,15 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 	shuffleVector(temp);
 
 	for (int i = 0; i < splitStrings.size(); i++) {
+		//block generation and fat population
 		table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
 		Block b(fileName);
 		nodes[temp[i]].pushBackBlock(b);
+
+		//file generation (for emmanuel)
+		exportBlock(fileName+"_"+nodes[temp[i]].getBlocks().size(), splitStrings[i])	//filename_blocknumber, content
 	}
+
 	splitStrings.clear();
 }
 void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string fileName) {	//work in progress
@@ -187,6 +193,12 @@ void exportFat(std::vector<Node> &nodes){
 		myFile << std::endl;
 	}
 	myFile.close();
+}
+void exportBlock(std::string fileName, std::string content) {
+	const std::string path = "storage/";
+	std::ofstream temp(path+fileName);
+	temp << content;
+	temp.close();
 }
 
 int main (int argc, char *argv[]){
