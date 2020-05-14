@@ -79,10 +79,61 @@ void split(std::vector<std::string> &vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 }
+//importing and exporting
+void importFat(std::vector<Node> &nodes, std::string filename){	//not working
+	printNice("Importing File Allocation Table from file");
+	std::ifstream myFile;
+	std::string line, fileName;
+	int nodeNumber, blockNumber, counter = 0;
+
+	//node number, filename block filename block filename block
+	myFile.open(filename);
+	if (myFile) {
+		while (getline(myFile, line)) {
+			std::istringstream iss(line);
+			iss >> nodeNumber;
+
+			Node temp(nodeNumber);
+			nodes.push_back(temp);
+			while (iss >> blockNumber >> fileName) {
+				Block b(fileName);
+				nodes[counter].getBlocks().push_back(b);
+			}
+			counter++;
+		}
+		myFile.close();
+	}
+	else {
+		printNice("error opening file");
+		return;
+	}
+}
+void exportFat(std::vector<Node> &nodes){
+	printNice("Exporting File Allocation Table as backup.txt");
+	std::ofstream myFile;
+	myFile.open("backup.txt");
+
+	//similar to the print function, just outputs.
+	for (int i = 0; i < nodes.size(); i++) {	//prints node number, file name, then block number
+		myFile << nodes[i].getNodeNumber() << " ";
+		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
+			myFile << nodes[i].getBlocks()[j].getFileName() << " " << j << " "; //<< nodes[i].getBlocks()[j].getData() << " ";
+		}
+		myFile << std::endl;
+	}
+	myFile.close();
+}
+void exportBlock(std::string fileName, std::string content) {
+	const std::string path = "storage/";
+	std::ofstream temp(path+fileName);
+	temp << content;
+	temp.close();
+}
+
 //populate Fat
 void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName){
 	//block shuffling - the order of temp is where the strings in splitStrings will go
-	std::vector<int> temp;	
+	std::vector<int> temp;
 	int counter = 0;
 	for (int i = 0; i < splitStrings.size(); i++) {
 		temp.push_back(i);
@@ -97,7 +148,8 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 		nodes[temp[i]].pushBackBlock(b);
 
 		//file generation (for emmanuel)
-		exportBlock(fileName+"_"+nodes[temp[i]].getBlocks().size(), splitStrings[i])	//filename_blocknumber, content
+		std::string newFileName = fileName+"_"+std::to_string(nodes[temp[i]].getBlocks().size());
+		exportBlock(newFileName, splitStrings[i]);	//filename_blocknumber, content
 	}
 
 	splitStrings.clear();
@@ -150,56 +202,6 @@ void printMap(std::multimap<std::string, std::pair<int, int>> &table) {
     }
     std::cout << "The combined file " << userInput << " is: " << s << std::endl;
 }*/
-//importing and exporting
-void importFat(std::vector<Node> &nodes, std::string filename){	//not working
-	printNice("Importing File Allocation Table from file");
-	std::ifstream myFile;
-	std::string line, fileName;
-	int nodeNumber, blockNumber, counter = 0;
-
-	//node number, filename block filename block filename block
-	myFile.open(filename);
-	if (myFile) {
-		while (getline(myFile, line)) {
-			std::istringstream iss(line);
-			iss >> nodeNumber;
-
-			Node temp(nodeNumber);
-			nodes.push_back(temp);
-			while (iss >> blockNumber >> fileName) {
-				Block b(fileName);
-				nodes[counter].getBlocks().push_back(b);
-			}
-			counter++;
-		}
-		myFile.close();
-	}
-	else {
-		printNice("error opening file");
-		return;
-	}
-}
-void exportFat(std::vector<Node> &nodes){
-	printNice("Exporting File Allocation Table as backup.txt");
-	std::ofstream myFile;
-	myFile.open("backup.txt");
-
-	//similar to the print function, just outputs.
-	for (int i = 0; i < nodes.size(); i++) {	//prints node number, file name, then block number
-		myFile << nodes[i].getNodeNumber() << " ";
-		for (int j = 0; j < nodes[i].getBlocks().size(); j++) {
-			myFile << nodes[i].getBlocks()[j].getFileName() << " " << j << " "; //<< nodes[i].getBlocks()[j].getData() << " ";
-		}
-		myFile << std::endl;
-	}
-	myFile.close();
-}
-void exportBlock(std::string fileName, std::string content) {
-	const std::string path = "storage/";
-	std::ofstream temp(path+fileName);
-	temp << content;
-	temp.close();
-}
 
 int main (int argc, char *argv[]){
 	int userChoice, numFiles;
