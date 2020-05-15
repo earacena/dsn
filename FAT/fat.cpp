@@ -14,6 +14,7 @@ class Fat{
 	private:
 		std::vector<Node> nodes;
 		std::string fileName;	//we dont use this.
+		std::multimap<std::string, std::pair<int, int>> table;
 };	
 
 Fat::Fat(){
@@ -33,4 +34,13 @@ std::vector<Node>& Fat::getNodes() {
 void Fat::setNodes(std::vector<Node> nodes) { //pass in reference to make it faster, const so it doesnt get modified.
 	this->nodes = nodes;
 }
+
+std::multimap<std::string, std::pair<int, int>> Fat::getTable() {
+	return table;
+}
+
+void std::multimap<std::string, std::pair<int, int>> Fat::setTable(std::multimap<std::string, std::pair<int,int>> table) {
+	this->table = table;
+}
+
 #endif 
