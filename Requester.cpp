@@ -241,9 +241,9 @@ void Requester::run(const Request & request) {
   
   } else if (request.type == "block_fetch") {
 
-    std::cout << request.target_block << std::endl;
+
     std::string block_request_message = std::string("?") + request.target_block + "_";
-    std::cout << "[Requester] Sending block request message to node(" 
+    std::cout << "[Requester] Sending block (" << request.target_block << ") request message to node (" 
               << request.target_address << ", " 
               << request.target_port << "): " << block_request_message << std::endl;
     const char * request_message = block_request_message.c_str();
@@ -293,6 +293,13 @@ void Requester::run(const Request & request) {
 
     std::cout << "[Requester] Block received: " << data << std::endl;  
 
+    std::ofstream block("./storage/" + request.target_block);
+    
+    block << data;
+    block.close();
+    
+    std::cout << "[Requester] Block stored (\"./storage/" + request.target_block << "\").";
+    
   } else {
     std::cout << "[Requester] Unrecognized request type: " << request.type << " ..." << std::endl;
     return;

@@ -432,8 +432,8 @@ void Listener::run() {
       if (response.substr(0,1) == "?") {
         std::string requested = response.substr(1, response.find('_')-1);
         log_file_ << "[Listener] Requested block name/hash: " << requested << std::endl;
-        std::string filename = "./" + requested;
-        std::ifstream file(filename, std::ios::binary);
+        std::string filename = "./storage/" + requested;
+        std::ifstream file(filename);
   
         if (!file.good()) {
           log_file_ << "[Listener] Requested block not found." << std::endl;

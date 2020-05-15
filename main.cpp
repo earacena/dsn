@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstdio>
 
 // libraries for client-side, including some above
 #include <arpa/inet.h>
@@ -197,12 +198,12 @@ int main() {
       
         send_block_to_node2.target_address = addresses[1];
         send_block_to_node2.target_port = ports[1];
-        send_block_to_node2.block_name = filename + "_" + node_num + "_1";
+        send_block_to_node2.block_name = filename + "_" + node_num + "_" + block_num;
         
         // Load block into memory
         std::vector<std::string> block;
         block.reserve(5);
-        filename = std::string("./storage/") + filename + "_" + node_num + "_1";
+        filename = std::string("./storage/") + filename + "_" + node_num + "_" + block_num;
         std::ifstream block_file(filename);
 
         std::cout << "[Requester] Filename: \"" << filename << "\"" << std::endl;
@@ -217,6 +218,8 @@ int main() {
         while(std::getline(block_file, line))
           block.push_back(line);
           
+        std::remove(filename.c_str()); 
+        
         send_block_to_node2.block_copy = block;
         block_distrib_thread_1 = std::thread{run_client, send_block_to_node2};
       }
@@ -229,11 +232,13 @@ int main() {
       
         send_block_to_node3.target_address = addresses[2];
         send_block_to_node3.target_port = ports[2];
-        send_block_to_node3.block_name = filename + "_" + node_num + "_1";
+        send_block_to_node3.block_name = filename + "_" + node_num + "_" + block_num;
         // Load block into memory
         std::vector<std::string> block;
         block.reserve(5);
-        filename = std::string("./storage/") + filename + "_" + node_num + "_1";
+        
+        
+        filename = std::string("./storage/") + filename + "_" + node_num + "_" + block_num;
         std::ifstream block_file(filename);
 
         std::cout << "[Requester] Filename: \"" << filename << "\"" << std::endl;
@@ -246,6 +251,8 @@ int main() {
         line = "";
         while(std::getline(block_file, line))
           block.push_back(line);
+        
+        std::remove(filename.c_str());
           
         send_block_to_node3.block_copy = block;
         block_distrib_thread_2 = std::thread{run_client, send_block_to_node3};
@@ -255,6 +262,8 @@ int main() {
     
     block_distrib_thread_1.join();
     block_distrib_thread_2.join();
+    
+    
   }
   
   // Immediately start listening for requests
@@ -273,7 +282,83 @@ int main() {
       std::cin >> filename;
       std::cout << "[Main] File \"" << filename << "\"...";
       
-      // List blocks, list locations (ip and port)  
+      // Assume any node could ask, load FAT and nodes.txt into memory  
+      std::ifstream fat_file("./backup.txt");
+      std::vector<std::string> fat;
+      
+      std::string line = "";
+      while(std::getline(fat_file, line))
+        fat.push_back(line);
+        
+      
+      std::ifstream nodes_file("./nodes.txt");
+      std::vector<std::string> nodes;
+      nodes.reserve(5);
+      
+      while(std::getline(nodes_file, line))
+        nodes.push_back(line);
+
+      std::vector<std::string> addresses;
+      addresses.reserve(5);
+      std::vector<int> ports;
+      ports.reserve(5);
+      
+      std::string temp = "";
+      std::string address = "";
+      std::string port = "";
+      
+      for (std::string line : nodes) {
+        temp = line.substr(0, line.find(" "));
+        line = line.substr(line.find(" ")+1, line.length());
+        
+        address = line.substr(0, line.find(" "));
+        line = line.substr(line.find(" ")+1, line.length());
+        
+        port = line;
+        
+        addresses.push_back(address);
+        ports.push_back(std::stoi(port));
+        
+      }
+      
+
+      std::string node_num = "";
+      std::string entry_filename = "";
+      std::string block_num = "";
+                  
+      for (std::string entry : fat) {
+        node_num = entry.substr(0, entry.find(" "));
+        entry = entry.substr(entry.find(" ")+1, entry.length());
+        
+        entry_filename = entry.substr(0, entry.find(" "));
+        entry = entry.substr(entry.find(" ")+1, entry.length());
+        
+        block_num = entry;
+        
+        if (entry_filename == filename) {
+          
+          std::fstream block("./storage/" + entry_filename + "_" + node_num + "_" + block_num);
+          // If block is not in storage folder
+          if (block.fail()) {
+            // Retrieve block
+            Request block_fetch;
+            
+            block_fetch.type = "block_fetch";
+            block_fetch.target_address = addresses[std::stoi(node_num)];
+            block_fetch.target_port = ports[std::stoi(node_num)];
+            
+            block_fetch.target_block = entry_filename + "_" + node_num + "_" + block_num;
+            std::thread block_fetch_thread(run_client, block_fetch);
+            
+            block_fetch_thread.join();
+          } else {
+            block.close();
+          }
+          
+        }
+      
+      }
+      
       
       
     } else {
