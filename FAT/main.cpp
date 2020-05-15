@@ -145,7 +145,7 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 		//block generation and fat population
 		table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
 		//Block b(fileName);
-		Block b(fileName, splitStrings[i])
+		Block b(fileName, splitStrings[i]);
 		nodes[temp[i]].pushBackBlock(b);
 
 		//file generation (for emmanuel)
@@ -203,8 +203,19 @@ void printCombinedFile(std::vector<Node> &nodes, std::multimap<std::string, std:
     }
     std::cout << "The combined file " << userInput << " is: " << s << std::endl;
 }
-void printEverything() {
-
+void printEverything(std::vector<Node> &nodes) {
+    if(nodes.size() > 0){
+		printNice("Showing File Allocation Table");
+		for(int i=0; i<nodes.size(); i++){	//goes through each node
+			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
+			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
+				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10)  << nodes[i].getBlocks()[j].getFileName() << " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
+			}
+		}
+	}
+	else{
+		printNice("Please set up the File Allocation Table first");
+	}
 }
 
 int main (int argc, char *argv[]){
