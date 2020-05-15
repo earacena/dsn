@@ -7,6 +7,7 @@
 #ifndef REQUESTER_HPP
 #define REQUESTER_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <thread>
 #include <fstream>

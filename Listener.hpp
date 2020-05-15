@@ -7,6 +7,7 @@
 #ifndef LISTENER_HPP
 #define LISTENER_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <thread>
 #include <fstream>

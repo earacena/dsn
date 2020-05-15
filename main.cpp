@@ -1,6 +1,6 @@
 // dsn - decentralized storage network
 
-
+#include <algorithm>
 #include <iostream>
 #include <thread>
 #include <fstream>
@@ -182,7 +182,7 @@ int main() {
       entry = entry.substr(entry.find(" ")+1, entry.length());
       
       block_num = entry;
-      
+      block_num.erase(std::remove(block_num.begin(), block_num.end(), ' '), block_num.end());
       
       // std::cout << "1: " << node_num << std::endl;
       // std::cout << "2: " << filename << std::endl;
@@ -204,6 +204,7 @@ int main() {
         std::vector<std::string> block;
         block.reserve(5);
         filename = std::string("./storage/") + filename + "_" + node_num + "_" + block_num;
+        filename.erase(std::remove(filename.begin(), filename.end(), ' '), filename.end());
         std::ifstream block_file(filename);
 
         std::cout << "[Requester] Filename: \"" << filename << "\"" << std::endl;
@@ -222,6 +223,8 @@ int main() {
         
         send_block_to_node2.block_copy = block;
         block_distrib_thread_1 = std::thread{run_client, send_block_to_node2};
+        block_distrib_thread_1.join();
+        std::remove(filename.c_str());
       }
       
       if (node_num == "2") {
@@ -239,6 +242,7 @@ int main() {
         
         
         filename = std::string("./storage/") + filename + "_" + node_num + "_" + block_num;
+        
         std::ifstream block_file(filename);
 
         std::cout << "[Requester] Filename: \"" << filename << "\"" << std::endl;
@@ -252,16 +256,16 @@ int main() {
         while(std::getline(block_file, line))
           block.push_back(line);
         
-        std::remove(filename.c_str());
+
           
         send_block_to_node3.block_copy = block;
         block_distrib_thread_2 = std::thread{run_client, send_block_to_node3};
+        block_distrib_thread_2.join();
+        
+        std::remove(filename.c_str());
       }
       
     }
-    
-    block_distrib_thread_1.join();
-    block_distrib_thread_2.join();
     
     
   }
@@ -276,11 +280,11 @@ int main() {
 
   while (user_input != "q") {
     if (user_input == "fetch") {
-      std::cout << "[Main] Preparing file fetch...";
+      std::cout << "[Main] Preparing file fetch..." << std::endl;
       std::string filename = "";
       std::cout << "[?] What is the name of the file?: ";
       std::cin >> filename;
-      std::cout << "[Main] File \"" << filename << "\"...";
+      std::cout << "\n[Main] File \"" << filename << "\"...\n";
       
       // Assume any node could ask, load FAT and nodes.txt into memory  
       std::ifstream fat_file("./backup.txt");
@@ -334,6 +338,10 @@ int main() {
         entry = entry.substr(entry.find(" ")+1, entry.length());
         
         block_num = entry;
+      
+        // Remove trailing spaces from block num
+        block_num.erase(std::remove(block_num.begin(), block_num.end(), ' '), block_num.end());
+        
         
         if (entry_filename == filename) {
           
