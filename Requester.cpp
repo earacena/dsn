@@ -21,7 +21,7 @@ void Requester::run(const Request & request) {
 
   // Prepare socket connection 
   int sock = 0;
-  int value = 0;
+  // int value = 0;
   std::string response = "";
 
   struct sockaddr_in serv_addr;
@@ -92,17 +92,17 @@ void Requester::run(const Request & request) {
     // std::cout << "[debug] string data: " << data << std::endl;
 
     // Chunk the data
-    if (data.length()+2 > server_buf_size) {
+    if ((int) data.length()+2 > server_buf_size) {
       std::vector<std::string> chunks;
       chunks.reserve(data.size()/server_buf_size-2);
       int chunk_size = server_buf_size-2;
-      for (int i = 0; i < data.length(); i += chunk_size) 
+      for (size_t i = 0; i < data.length(); i += chunk_size) 
       chunks.push_back(data.substr(i, chunk_size));
   
       std::string symbol = "^";
  
       // Conform to reply format
-      for (int i = 0; i < chunks.size(); ++i) {
+      for (size_t i = 0; i < chunks.size(); ++i) {
         if (i == 0)
           chunks[0] = symbol + chunks[0] + "&";
         // last element
@@ -145,17 +145,17 @@ void Requester::run(const Request & request) {
     // std::cout << "[debug] string data: " << data << std::endl;
 
     // Chunk the data
-    if (data.length()+2 > server_buf_size) {
+    if ((int) data.length()+2 > server_buf_size) {
       std::vector<std::string> chunks;
       chunks.reserve(data.size()/server_buf_size-2);
-      int chunk_size = server_buf_size-2;
-      for (int i = 0; i < data.length(); i += chunk_size) 
+      size_t chunk_size = server_buf_size-2;
+      for (size_t i = 0; i < data.length(); i += chunk_size) 
       chunks.push_back(data.substr(i, chunk_size));
   
       std::string symbol = "@";
  
       // Conform to reply format
-      for (int i = 0; i < chunks.size(); ++i) {
+      for (size_t i = 0; i < chunks.size(); ++i) {
         if (i == 0)
           chunks[0] = symbol + chunks[0] + "&";
         // last element

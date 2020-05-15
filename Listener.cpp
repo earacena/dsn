@@ -334,9 +334,9 @@ void Listener::run() {
         std::ifstream file(filename, std::ios::binary);
   
         if (!file.good()) {
-          log_file_ << "[Listener] Requested block not found." << std::endl;       
-          char * not_found_message = ">badblock_";
-          send(sock, not_found_message, strlen(not_found_message), 0);
+          log_file_ << "[Listener] Requested block not found." << std::endl;
+          std::string not_found_message_str = ">badblock_";       
+          send(sock, not_found_message_str.c_str(), strlen(not_found_message_str.c_str()), 0);
           return;
         }
     
@@ -350,20 +350,19 @@ void Listener::run() {
           while (std::getline(file, current))
            data  = data + current + '\n';
   
-          if (data.length()+1 > client_buf_size) {
+          if ((int)data.length()+1 > client_buf_size) {
             // Split block into chunks of client buffer size (minus two for the >..._ reply form and 
             // terminating underscore)
             std::vector<std::string> chunks;
             chunks.reserve(data.size()/client_buf_size-2);
-            int chunk_size = client_buf_size-2;
-            for (int i = 0; i < data.length(); i += chunk_size) {
+            size_t chunk_size = client_buf_size-2;
+            for (size_t i = 0; i < data.length(); i += chunk_size) {
               chunks.push_back(data.substr(i, chunk_size));
             }
 
-
             // Transmission
             // Conform to reply format
-            for (int i = 0; i < chunks.size(); ++i) {
+            for (size_t i = 0; i < chunks.size(); ++i) {
               if (i == 0)
                 chunks[0] = std::string(">") + chunks[0] + "&";
               // last element
