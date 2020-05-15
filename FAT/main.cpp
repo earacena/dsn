@@ -148,7 +148,7 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 		nodes[temp[i]].pushBackBlock(b);
 
 		//file generation (for emmanuel)
-		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size());   //filename_nodenumber_blocknumber
+		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
 		exportBlock(newFileName, splitStrings[i]);	//filename, content
 	}
 
