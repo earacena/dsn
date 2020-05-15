@@ -23,6 +23,10 @@ mkdir node1;
 mkdir node2;
 mkdir node3;
 
+mkdir node1/storage;
+mkdir node2/storage;
+mkdir node3/storage;
+
 echo "[Setup] Moving node executable...";
 cp node ./node1;
 cp node ./node2;

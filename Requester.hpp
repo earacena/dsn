@@ -32,6 +32,10 @@ struct Request {
   // type: nodes_distrib
   std::vector<std::string> nodes_copy;
 
+  // type: block_transmit, used for sending blocks to other nodes (transmit)
+  std::string block_name = "";
+  std::vector<std::string> block_copy;
+
   // type: block_fetch, used for fetching single blocks (fetch)
   std::string target_block = "";
 };

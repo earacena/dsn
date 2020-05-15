@@ -320,7 +320,109 @@ void Listener::run() {
 
           log_file_ << "[Listener] nodes.txt stored (\"./nodes.txt\")." << std::endl;
         }
+       
+        break; 
+      }
 
+
+     if (response.substr(0, 1) == "%") {
+        // Multi-chunk transmission
+        if (response.substr(response.length()-1,1) == "&") {
+          for (char & ch : server_buf)
+            ch = 0;
+          int msg_size = recv(sock, server_buf, server_buf_size, 0);
+          response = server_buf;
+          response = response.substr(0, msg_size);  
+          
+          log_file_ << "[Listener] Message received: " << response << std::endl;
+          
+          if (!valid_transmit_form(response)) {
+            log_file_ << "[Listener] Invalid reply format. Exiting listening thread..." << std::endl;
+            return;
+          }
+          
+          std::vector<std::string> chunks;
+          chunks.reserve(15);
+          
+          chunks.push_back(response);
+          
+          while ((response.substr(0,1) == "&" || response.substr(response.length()-1, 1) == "&") && 
+                 (response.substr(response.length()-1, 1) != "_")) {
+            for (char & ch : server_buf)
+              ch = 0;
+            msg_size = recv(sock, server_buf, server_buf_size, 0);
+            response = server_buf;
+            response = response.substr(0, msg_size);
+          
+            log_file_ << "[Listener] Chunk received: " << response << std::endl;
+            chunks.push_back(response);
+          }
+          
+          // process chunks, extract data
+          for (std::string & chunk : chunks)
+            chunk = chunk.substr(1, chunk.length()-2);
+          
+          std::string data = "";
+  
+          for (std::string & chunk : chunks)
+            data = data + chunk;
+          
+          log_file_ << "[Listener] Combined block chunks received: " << data << std::endl;
+
+          // swap '*' for newlines
+          std::vector<std::string> block;
+          block.reserve(10);
+          
+          response = response.substr(1, response.length()-2);
+          std::istringstream sstr(response);
+          std::string line;
+          while (std::getline(sstr, line, '*')) {
+            block.push_back(line + '\n');
+          }
+
+          log_file_ << "[Listener] Block data: \n";
+          for (std::string & line : block)
+            log_file_ << line;
+
+
+          std::string filename = "./storage/" + block[0].substr(0, block[0].length()-1);
+          
+
+          std::ofstream block_file(filename);
+          for (size_t i = 1; i < block.size(); ++i)
+            block_file << block[i];
+          block_file.close();
+
+          log_file_ << "[Listener] block stored (\"" << filename <<"\")." << std::endl;
+
+        } else {
+
+          // single chunk transmission
+          // swap '*' for newlines
+          std::vector<std::string> block;
+          block.reserve(10);
+          
+          response = response.substr(1, response.length()-2);
+          std::istringstream sstr(response);
+          std::string line;
+          while (std::getline(sstr, line, '*')) {
+            block.push_back(line + '\n');
+          }
+          log_file_ << "[Listener] Block data: \n";
+          for (std::string & line : block)
+            log_file_ << line;
+
+          std::string filename = "./storage/" + block[0].substr(0, block[0].length()-1);
+          
+          
+
+          std::ofstream block_file(filename);
+          for (size_t i = 1; i < block.size(); ++i)
+            block_file << block[i];
+          block_file.close();
+
+          log_file_ << "[Listener] block stored (\"" << filename << "\")." << std::endl;
+        }
 
         break;
       }
