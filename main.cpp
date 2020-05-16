@@ -16,7 +16,7 @@
 #include "Listener.hpp"
 
 void menu() {
-  std::cout << "Menu:\n";
+  std::cout << "\nMenu:\n";
   std::cout << "\ttype \"fetch\" to collect all distributed blocks and store local file copy\n";
    
 
@@ -367,7 +367,53 @@ int main() {
       
       }
       
+      // Combine all the blocks in storage folder
+      // Scan storage for all blocks with filename
       
+      std::ofstream combined_file("./storage/" + filename);
+      
+      std::ifstream block;
+	  std::vector<std::string> combine_filenames;
+      
+      // Generate a list of relevant filenames to each block
+      for (std::string entry : fat) {
+		node_num = entry.substr(0, entry.find(" "));
+        entry = entry.substr(entry.find(" ")+1, entry.length());
+        
+        entry_filename = entry.substr(0, entry.find(" "));
+        entry = entry.substr(entry.find(" ")+1, entry.length());
+        
+      
+        block_num = entry;
+
+        // Remove trailing spaces from block num
+        block_num.erase(std::remove(block_num.begin(), block_num.end(), ' '), block_num.end());
+        
+        if (entry_filename == filename) {
+		  combine_filenames.push_back(entry_filename + "_" + node_num + "_" + block_num);
+		}
+      }
+      
+      for (int i = combine_filenames.size()-1; i >= 0; --i) {
+		std::cout << "\n[Main] Combining block \"" << combine_filenames[i] << "\"..." << std::endl; 
+		block.open("./storage/" + combine_filenames[i]);
+		
+		if (!block.is_open()) {
+		  std::cout << "[Main] Error opening \"" << combine_filenames[i] << "\"." << std::endl;
+		  break;
+		}
+			
+		std::string line = "";
+		while(std::getline(block, line))
+			combined_file << line;
+		
+		block.close(); 
+	  }
+	  
+	  std::cout << "[Main] file stored in (\".storage/" << filename << "\")." << std::endl; 
+      combined_file.close();
+      
+      std::cout << "[Main] Done fetching file." << std::endl;
       
     } else {
       std::cout << "[ERROR] Unknown command: \"" << user_input << "\"...\n"; 
