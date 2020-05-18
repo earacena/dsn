@@ -1,12 +1,14 @@
 #include <iostream>		//couts
 #include <vector>		//data storage
 #include "node.cpp"		//nodes
-#include "block.cpp"	//blocks for createBlock
+// #include "block.cpp"	//blocks for createBlock
 #include <fstream>		//file generation
 #include <iomanip>	    //io manipulation - for inputs
 #include <sstream>		//for importing FAT (iss >> x)
 #include <stdlib.h>		//rand
 #include <map>			//map multi map
+#include "Blockchain/blockchain.hpp"
+// #include "Blockchain/blocks.hpp"
 
 #define RESET 	"\033[0m"
 #define YELLOW 	"\033[33m"
@@ -131,7 +133,7 @@ void exportBlock(std::string fileName, std::string content) {
 }
 
 //populate Fat
-void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName){
+void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName, Blockchain &blockchain){
 	//block shuffling - the order of temp is where the strings in splitStrings will go
 	std::vector<int> temp;
 	int counter = 0;
@@ -147,6 +149,15 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 		//Block b(fileName);
 		Block b(fileName, splitStrings[i]);
 		nodes[temp[i]].pushBackBlock(b);
+
+		TransactionData data;
+		data.fileName = fileName;
+		data.content = splitStrings[i];
+		data.receiverNode = temp[i];
+		data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+		data.timestamp = time(&data.timestamp);
+		// adding each transactional data to the blockchain
+		blockchain.addBlock(data); // Data of each transaction
 
 		//file generation (for emmanuel)
 		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
@@ -233,9 +244,12 @@ int main (int argc, char *argv[]){
 	std::vector<std::string> fileContent;
 	populateNameVecWithRandom(fileNames, fileContent);
 
+	// blockchain: @params: difficulty of PoW algorithm. Higher the more difficulty.
+	Blockchain bchain(2); 
+
 	while (true)
 	{
-		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File" << RESET << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File, 11: Print Blockchain, 12: Is it a valid Blockchain?" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
@@ -270,7 +284,7 @@ int main (int argc, char *argv[]){
 					fileName = fileNames[nameIterator];
 
 					split(splitStrings, userInput, numFiles);
-					createBlocks(nodes, table, splitStrings, fileName);
+					createBlocks(nodes, table, splitStrings, fileName, bchain);
 					nameIterator++;
 				}
 				else {
@@ -330,6 +344,18 @@ int main (int argc, char *argv[]){
 				}
 				else {
 					printNice("Please set up the File Allocation Table first");
+				}
+				break;
+			case 11:
+				printNice("Showing Blockchain");
+				bchain.printChain();
+				break;
+			case 12:
+				if (bchain.isChainValid()) {
+					printNice("VALID");
+				}
+				else {
+					printNice("INVALID");
 				}
 				break;
 			default:

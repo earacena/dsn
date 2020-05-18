@@ -12,10 +12,10 @@ rm -r node3;
 echo "[Setup] Compiling network code (node)...";
 make;
 
-# Compile FAT code
+# Compile FAT & Blockchain code
 cd FAT;
 echo "[Setup] Compiling FAT code (fat)...";
-g++ main.cpp -o a -g
+g++ main.cpp Blockchain/blockchain.cpp Blockchain/blocks.cpp Blockchain/sha256.cpp -o a -g
 
 echo "[Setup] Creating folders...";
 cd ..;
