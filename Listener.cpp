@@ -61,9 +61,8 @@ void Listener::run() {
 
   log_file_ << "[Listener] Initializing server..." << std::endl;
 
-  int server_fd, sock, value, max_sd, activity;
+  int server_fd;
   struct sockaddr_in address;
-  struct sockaddr_storage remoteaddr;
   int opt = 1;
   int addrlen = sizeof(address);
 
