@@ -166,6 +166,35 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 
 	splitStrings.clear();
 }
+
+void exportBlockchain(Blockchain Chain){
+	printNice("Exporting Blockchain as blockchain.txt");
+	std::ofstream myfile;
+	myfile.open("blockchain.txt");
+
+	std::vector<Blocks>::iterator it;
+	std::vector<Blocks> blockchain = Chain.getChain();
+
+    for (size_t b = 0; b < blockchain.size(); b++) {
+        Blocks currentBlock = blockchain[b];
+
+        myfile << "\nBlock====================================================================";
+        myfile << "\nIndex: " << currentBlock.getIndex();
+        myfile << "\nHash: " << currentBlock.getHash();
+        myfile << "\nPrevHash: " << currentBlock.getPrevHash();
+        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
+        myfile << "\nFilename: " << currentBlock.getData().fileName;
+        myfile << "\nContent: " << currentBlock.getData().content;
+        myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
+        myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
+        myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
+        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
+        myfile << "\n";
+    }
+	myfile.close();
+
+}
+
 /*void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string fileName) {	//work in progress
 
 }*/
@@ -249,7 +278,7 @@ int main (int argc, char *argv[]){
 
 	while (true)
 	{
-		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File, 11: Print Blockchain, 12: Is it a valid Blockchain?" << RESET << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File\n 11: Print Blockchain, 12: Is it a valid Blockchain?, 13: Export Blockchain" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
@@ -357,6 +386,9 @@ int main (int argc, char *argv[]){
 				else {
 					printNice("INVALID");
 				}
+				break;
+			case 13:
+				exportBlockchain(bchain);
 				break;
 			default:
 				std::cout << RED << "*****You didn't enter a proper command*****" << RESET << std::endl;

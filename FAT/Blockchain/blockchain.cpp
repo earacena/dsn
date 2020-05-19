@@ -13,6 +13,10 @@ Blockchain::Blockchain(int d) {
     difficulty = d; // set it to whatever you want the difficulty of PoW to be.
 }
 
+std::vector<Blocks> Blockchain::getChain() {
+    return Chain;
+}
+
 void Blockchain::addBlock(TransactionData data) {
     Blocks newBlock(Chain.size(), data, Chain[Chain.size()-1].getHash(), difficulty);
     //   Before adding newBlock to Chain, the block has to produce a PoW. Send it to other nodes for verification
