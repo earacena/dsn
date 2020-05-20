@@ -241,8 +241,8 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         std::vector<std::string> fat;
         fat.reserve(10);
 
-        response = response.substr(1, response.length() - 2);
-        std::istringstream sstr(response);
+        //response = response.substr(1, response.length() - 2);
+        std::istringstream sstr(data);
         std::string line;
         while (std::getline(sstr, line, '*')) {
           fat.push_back(line + '\n');
@@ -344,8 +344,8 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         std::vector<std::string> nodes;
         nodes.reserve(10);
 
-        response = response.substr(1, response.length() - 2);
-        std::istringstream sstr(response);
+        //response = response.substr(1, response.length() - 2);
+        std::istringstream sstr(data);
         std::string line;
         while (std::getline(sstr, line, '*')) {
           nodes.push_back(line + '\n');
@@ -452,7 +452,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
         //response = response.substr(1, response.length() - 2);
         std::istringstream sstr(data);
-        std::string line;
+        std::string line = "";
         while (std::getline(sstr, line, '*')) {
           blockchain.push_back(line + '\n');
         }
