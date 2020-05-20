@@ -1,0 +1,11 @@
+
+Block====================================================================
+Index: 0
+Hash: 51622d42c201842dd35c7ac90df0350ab76170d951c60d5f8965c9bab646f5ff
+PrevHash: 1
+Filename: N/A
+Content: N/A
+ReceiverNode: -1
+NodeBlock: 0
+Timestamp: 1589997930
+Proof: 100

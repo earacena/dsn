@@ -27,6 +27,19 @@ Blocks::Blocks(size_t index, TransactionData data, std::string prevHash, int dif
     _proof = mineBlock(difficulty);
 }
 
+Blocks::Blocks(size_t index, TransactionData data, std::string prevHash, std::string hash, std::string proof) {
+    _index = index;
+    _nonce = 0;
+    _data.fileName = data.fileName;
+    _data.receiverNode = data.receiverNode;
+    _data.nodeBlock = data.nodeBlock;
+    _data.content = data.content;
+    _data.timestamp = data.timestamp; // _time set to current time (UNIX timestamp)-seconds elapsed since 12am 01/01/1970
+    _prevHash = prevHash;
+    _blockHash = hash;
+    _proof = proof;
+}
+
 std::string Blocks::getHash() {
     return _blockHash;
 }
@@ -41,6 +54,10 @@ TransactionData Blocks::getData() {
 
 size_t Blocks::getIndex() {
     return _index;
+}
+
+std::string Blocks::getProof() {
+    return _proof;
 }
 
 std::string Blocks::generateHash() {

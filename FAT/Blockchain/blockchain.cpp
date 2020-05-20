@@ -13,6 +13,11 @@ Blockchain::Blockchain(int d) {
     difficulty = d; // set it to whatever you want the difficulty of PoW to be.
 }
 
+// used for importing Blockchain, only sets the difficulty
+Blockchain::Blockchain(int d, int random) {
+    difficulty = d;
+}
+
 std::vector<Blocks> Blockchain::getChain() {
     return Chain;
 }
@@ -26,25 +31,38 @@ void Blockchain::addBlock(TransactionData data) {
     Chain.push_back(newBlock);
 }
 
-void Blockchain::printChain() {
-        std::vector<Blocks>::iterator it;
-    
-    for (size_t b = 0; b < Chain.size(); b++) {
-        Blocks currentBlock = Chain[b];
+// overload: used when importing Blockchain
+void Blockchain::addBlock(TransactionData data, std::string hash, std::string prevhash, int index, std::string proof) {
+    Blocks newBlock(index, data, prevhash, hash, proof);
+    Chain.push_back(newBlock);
+}
 
-        std::cout << "\nBlock====================================================================";
-        std::cout << "\nIndex: " << currentBlock.getIndex();
-        std::cout << "\nHash: " << currentBlock.getHash();
-        std::cout << "\nPrevHash: " << currentBlock.getPrevHash();
-        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
-        std::cout << "\nFilename: " << currentBlock.getData().fileName;
-        std::cout << "\nContent: " << currentBlock.getData().content;
-        std::cout << "\nReceiverNode: " << currentBlock.getData().receiverNode;
-        std::cout << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
-        std::cout << "\nTimestamp: " << currentBlock.getData().timestamp;
-        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
-        std::cout << "\n";
+void Blockchain::printChain() {
+    std::vector<Blocks>::iterator it;
+    
+    if (Chain.size() == 0) {
+        std::cout << "You have not imported a Blockchain\n";
     }
+    else {
+        for (size_t b = 0; b < Chain.size(); b++) {
+            Blocks currentBlock = Chain[b];
+
+            std::cout << "\nBlock====================================================================";
+            std::cout << "\nIndex: " << currentBlock.getIndex();
+            std::cout << "\nHash: " << currentBlock.getHash();
+            std::cout << "\nPrevHash: " << currentBlock.getPrevHash();
+            // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
+            std::cout << "\nFilename: " << currentBlock.getData().fileName;
+            std::cout << "\nContent: " << currentBlock.getData().content;
+            std::cout << "\nReceiverNode: " << currentBlock.getData().receiverNode;
+            std::cout << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
+            std::cout << "\nTimestamp: " << currentBlock.getData().timestamp;
+            std::cout << "\nProof: " << currentBlock.getProof();
+            // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
+            std::cout << "\n";
+        }
+    }
+    
 }
 
 bool Blockchain::isChainValid() {

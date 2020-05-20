@@ -21,6 +21,7 @@ class Blocks {
         // Constructor
         Blocks(size_t index, TransactionData data, std::string prevHash); // for the GenesisBlock
         Blocks(size_t index, TransactionData data, std::string prevHash, int difficulty);
+        Blocks(size_t index, TransactionData data, std::string prevHash, std::string hash, std::string proof);
 
         // Getters
         size_t getIndex();
@@ -28,6 +29,7 @@ class Blocks {
         std::string getPrevHash();
         TransactionData getData();
         std::string mineBlock(int difficulty); // mine the block by producing the PoW.
+        std::string getProof();
 
         bool isHashValid();
         bool isProofValid(int difficulty);
