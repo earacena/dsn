@@ -19,8 +19,8 @@ Listener::~Listener() { log_file_.close(); }
 
 bool valid_reply_form(const std::string &response) {
   // >..._
-  log_file_ << "[Listenter]\nfirst: " << response.substr(0, 1) << "." << std::endl;
-  log_file_ << "second:" << response.substr(response.length() - 1, 1) << "."
+  std::cout << "[Listenter]\nfirst: " << response.substr(0, 1) << "." << std::endl;
+  std::cout << "second:" << response.substr(response.length() - 1, 1) << "."
             << std::endl;
   return (response.substr(0, 1) == ">" &&
           response.substr(response.length() - 1, 1) == "_");
@@ -36,8 +36,8 @@ bool valid_transmit_form(const std::string &response) {
   if (response == ">badblock_")
     return false;
 
-  log_file_ << "[Listener] first: " << response.substr(0, 1) << "." << std::endl;
-  log_file_ << "[Listener] second: " << response.substr(response.length() - 1, 1)
+  std::cout << "[Listener] first: " << response.substr(0, 1) << "." << std::endl;
+  std::cout << "[Listener] second: " << response.substr(response.length() - 1, 1)
             << "." << std::endl;
 
   bool one_chunk = (response.substr(0, 1) == ">" &&
@@ -49,7 +49,7 @@ bool valid_transmit_form(const std::string &response) {
   bool last_chunk = (response.substr(0, 1) == "&" &&
                      response.substr(response.size() - 1, 1) == "_");
 
-  log_file_ << "[Listener] transmit form [" << response << "]: "
+  std::cout << "[Listener] transmit form [" << response << "]: "
             << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good"
                                                                     : "bad")
             << std::endl;
@@ -188,8 +188,12 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
     // Receiving FAT
     if (response.substr(0, 1) == "^") {
+	  std::vector<std::string> chunks;
+      chunks.reserve(15);
+      
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);
         for (char & ch : server_buf)
           ch = 0;
 
@@ -206,8 +210,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
@@ -291,8 +294,12 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
     // nodes.txt transmission
     if (response.substr(0, 1) == "@") {
+	  std::vector<std::string> chunks;
+      chunks.reserve(15);
+      
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);
         for (char &ch : server_buf)
           ch = 0;
 
@@ -309,8 +316,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
@@ -397,8 +403,13 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
     // blockchain transmission
     if (response.substr(0, 1) == "#") {
+	  std::vector<std::string> chunks;
+      chunks.reserve(15);
+
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);  
+		
         for (char &ch : server_buf)
           ch = 0;
 
@@ -415,8 +426,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
@@ -503,8 +513,14 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
 
     if (response.substr(0, 1) == "%") {
+      std::vector<std::string> chunks;
+      chunks.reserve(15);
+      
+
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);
+		  
         for (char &ch : server_buf)
           ch = 0;
         int msg_size = recv(sock, server_buf, server_buf_size, 0);
@@ -520,8 +536,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
