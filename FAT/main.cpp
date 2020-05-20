@@ -167,6 +167,34 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 	splitStrings.clear();
 }
 
+void exportBlockchain(Blockchain Chain){
+	printNice("Exporting Blockchain as blockchain.txt");
+	std::ofstream myfile;
+	myfile.open("blockchain.txt");
+
+	std::vector<Blocks>::iterator it;
+	std::vector<Blocks> blockchain = Chain.getChain();
+
+    for (size_t b = 0; b < blockchain.size(); b++) {
+        Blocks currentBlock = blockchain[b];
+
+        myfile << "\nBlock====================================================================";
+        myfile << "\nIndex: " << currentBlock.getIndex();
+        myfile << "\nHash: " << currentBlock.getHash();
+        myfile << "\nPrevHash: " << currentBlock.getPrevHash();
+        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
+        myfile << "\nFilename: " << currentBlock.getData().fileName;
+        myfile << "\nContent: " << currentBlock.getData().content;
+        myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
+        myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
+        myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
+		myfile << "\nProof: " << currentBlock.getProof();
+        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
+        myfile << "\n";
+    }
+	myfile.close();
+
+}
 std::string storeAfterSpace(std::string line) { // IMPORT BLOCKCHAIN HELPER
 	bool canStore = false;
 	std::string toStore = "";
@@ -180,7 +208,7 @@ std::string storeAfterSpace(std::string line) { // IMPORT BLOCKCHAIN HELPER
 	}
 	return toStore;
 }
-void importBlockchain(std::string file, Blockchain &importedChain) {
+void importBlockchain(std::string file, Blockchain &importedChain, Blockchain initialChain) {
 	printNice("Importing Blockchain from file");
 	std::ifstream myfile;
 	std::string line;
@@ -251,40 +279,19 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 			data.timestamp = timestamp;
 			importedChain.addBlock(data, hash, prevHash, index, proof); // Data of each transaction
 		}
+		if (importedChain.isChainValid() && importedChain.getChain().size() >= initialChain.getChain().size()) {
+			printNice("Chain validated, storing at blockchain.txt");
+			exportBlockchain(importedChain);
+		}
+		else {
+			printNice("Invalid imported Blockchain.");
+		}
 		myfile.close();
 	}
 	else {
 		printNice("error opening file");
 		return;
 	}
-}
-void exportBlockchain(Blockchain Chain){
-	printNice("Exporting Blockchain as blockchain.txt");
-	std::ofstream myfile;
-	myfile.open("blockchain.txt");
-
-	std::vector<Blocks>::iterator it;
-	std::vector<Blocks> blockchain = Chain.getChain();
-
-    for (size_t b = 0; b < blockchain.size(); b++) {
-        Blocks currentBlock = blockchain[b];
-
-        myfile << "\nBlock====================================================================";
-        myfile << "\nIndex: " << currentBlock.getIndex();
-        myfile << "\nHash: " << currentBlock.getHash();
-        myfile << "\nPrevHash: " << currentBlock.getPrevHash();
-        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
-        myfile << "\nFilename: " << currentBlock.getData().fileName;
-        myfile << "\nContent: " << currentBlock.getData().content;
-        myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
-        myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
-        myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
-		myfile << "\nProof: " << currentBlock.getProof();
-        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
-        myfile << "\n";
-    }
-	myfile.close();
-
 }
 
 /*void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string fileName) {	//work in progress
@@ -488,7 +495,7 @@ int main (int argc, char *argv[]){
 			case 14:
 				printNice("Enter the name of the file you want to import the blockchain from, e.g. `blockchain.txt`");
 				std::cin >> filename;
-				importBlockchain(filename, importedChain);
+				importBlockchain(filename, importedChain, bchain);
 				break;
 			case 15:
 				importedChain.printChain();
