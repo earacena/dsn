@@ -157,7 +157,44 @@ int main() {
   
     nodes_distrib_thread_1.join();
     nodes_distrib_thread_2.join();
+    
+    
+    // Usecase 4, distribute a copy of the initial blockchain
+	Request send_blockchain_to_node2;
+	Request send_blockchain_to_node3;
+    
+    send_blockchain_to_node2.type = "blockchain_distrib";
+    send_blockchain_to_node3.type = "blockchain_distrib";
         
+    send_blockchain_to_node2.target_address = addresses[1];
+    send_blockchain_to_node3.target_address = addresses[2];
+  
+    send_blockchain_to_node2.target_port = ports[1];
+    send_blockchain_to_node3.target_port = ports[2];
+   
+	// Load blockchain into memory
+	std::vector<std::string> blockchain;
+	std::ifstream blockchain_file("./blockchain.txt");
+	if (!blockchain_file.is_open()) {
+		std::cout << "[Error] blockchain.txt not found." << std::endl;
+	} else {
+		std::string line = "";
+		while (std::getline(blockchain_file, line))
+			blockchain.push_back(line);
+
+		puts("Test");
+		blockchain_file.close();
+	}
+   
+    send_blockchain_to_node2.blockchain_copy = blockchain;   
+    send_blockchain_to_node3.blockchain_copy = blockchain;   
+  
+    std::thread blockchain_distrib_thread_1(run_client, send_blockchain_to_node2); 
+    std::thread blockchain_distrib_thread_2(run_client, send_blockchain_to_node3); 
+  
+    blockchain_distrib_thread_1.join();
+    blockchain_distrib_thread_2.join();
+    
         
     // Usecase 3, send respective blocks to every node
     Request send_block_to_node2;

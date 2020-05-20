@@ -36,6 +36,9 @@ struct Request {
   // type: block_transmit, used for sending blocks to other nodes (transmit)
   std::string block_name = "";
   std::vector<std::string> block_copy;
+  
+  // type: blockchain_distrib
+  std::vector<std::string> blockchain_copy;
 
   // type: block_fetch, used for fetching single blocks (fetch)
   std::string target_block = "";
