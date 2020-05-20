@@ -92,3 +92,131 @@ bool Blockchain::isChainValid() {
     }
     return true;
 }
+
+/* Functions for the receiving node, when it receives txt file with updated blockchain from neighbor nodes*/
+void exportChain(Blockchain Chain){
+	std::cout << "Exporting Blockchain as blockchain.txt\n";
+	std::ofstream myfile;
+	myfile.open("blockchain.txt");
+
+	std::vector<Blocks>::iterator it;
+	std::vector<Blocks> blockchain = Chain.getChain();
+
+    for (size_t b = 0; b < blockchain.size(); b++) {
+        Blocks currentBlock = blockchain[b];
+
+        myfile << "\nBlock====================================================================";
+        myfile << "\nIndex: " << currentBlock.getIndex();
+        myfile << "\nHash: " << currentBlock.getHash();
+        myfile << "\nPrevHash: " << currentBlock.getPrevHash();
+        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
+        myfile << "\nFilename: " << currentBlock.getData().fileName;
+        myfile << "\nContent: " << currentBlock.getData().content;
+        myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
+        myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
+        myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
+		myfile << "\nProof: " << currentBlock.getProof();
+        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
+        myfile << "\n";
+    }
+	myfile.close();
+
+}
+std::string store_after_space(std::string line) { // IMPORT BLOCKCHAIN HELPER
+	bool canStore = false;
+	std::string toStore = "";
+	for (char ch : line) {
+		if(canStore) {
+			toStore += ch;
+		}
+		if (isblank(ch)) {
+			canStore = true;
+		}
+	}
+	return toStore;
+}
+void importChain(const std::string file) {
+	std::ifstream myfile;
+	std::string line;
+    Blockchain chain(2,-1);
+
+	myfile.open(file);
+	if (myfile) {
+		while (getline(myfile, line)) { //empty line
+			int index, receiverNode;
+			size_t nodeBlock;
+			time_t timestamp;
+			std::string hash = "", prevHash = "", fileName = "", content = "", proof = "";
+
+			std::string toStore = "";
+			getline(myfile, line); 	// block=======
+			getline(myfile, line);	// Index: (int)
+			// index = std::stoi(store_after_space(line),nullptr,16);
+			// index = std::stoi(toStore);
+			toStore = store_after_space(line);
+			std::istringstream issindex(toStore);
+			for (char c : toStore) {
+				issindex >> index;
+			}
+
+			getline(myfile, line); // Hash: (string)
+			hash = store_after_space(line);
+
+			getline(myfile, line); // PreviousHash: (string)
+			prevHash = store_after_space(line);
+
+			getline(myfile, line); // fileName: (string)
+			fileName = store_after_space(line);
+
+			getline(myfile, line); // content: (string)
+			content = store_after_space(line);
+
+			getline(myfile, line); // receiverNode: (int)
+			toStore = store_after_space(line);
+			std::istringstream issnode(toStore);
+			for (char c : toStore) {
+				issnode >> receiverNode;
+			}
+			// toStore = store_after_space(line);
+			// receiverNode = std::stoi(toStore);
+			// receiverNode = std::stoi(store_after_space(line),nullptr,16);
+			
+			getline(myfile, line); // nodeBlock: (size_t)
+			toStore = store_after_space(line);
+			std::istringstream iss(toStore);
+			for (char c : toStore) {
+				iss >> nodeBlock;
+			}
+
+			getline(myfile, line); // timestamp: (time_t)
+			toStore = store_after_space(line);
+			std::istringstream isstime(toStore);
+			for (char c : toStore) {
+				isstime >> timestamp;
+			}
+
+			getline(myfile, line); // proof: (string)
+			proof = store_after_space(line);
+			
+			TransactionData data;
+			data.fileName = fileName;
+			data.content = content;
+			data.receiverNode = receiverNode;
+			data.nodeBlock = nodeBlock;
+			data.timestamp = timestamp;
+			chain.addBlock(data, hash, prevHash, index, proof); // Data of each transaction
+		}
+		if (chain.isChainValid()) {
+			std::cout << "Chain validated, storing at blockchain.txt\n";
+			exportChain(chain);
+		}
+		else {
+			std::cout << "Invalid imported Blockchain\n";
+		}
+		myfile.close();
+	}
+	else {
+		std::cout << "error opening file\n";
+		return;
+	}
+}

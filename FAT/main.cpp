@@ -208,7 +208,7 @@ std::string storeAfterSpace(std::string line) { // IMPORT BLOCKCHAIN HELPER
 	}
 	return toStore;
 }
-void importBlockchain(std::string file, Blockchain &importedChain, Blockchain initialChain) {
+void importBlockchain(std::string file, Blockchain &importedChain) {
 	printNice("Importing Blockchain from file");
 	std::ifstream myfile;
 	std::string line;
@@ -279,7 +279,7 @@ void importBlockchain(std::string file, Blockchain &importedChain, Blockchain in
 			data.timestamp = timestamp;
 			importedChain.addBlock(data, hash, prevHash, index, proof); // Data of each transaction
 		}
-		if (importedChain.isChainValid() && importedChain.getChain().size() >= initialChain.getChain().size()) {
+		if (importedChain.isChainValid()) {
 			printNice("Chain validated, storing at blockchain.txt");
 			exportBlockchain(importedChain);
 		}
@@ -495,7 +495,8 @@ int main (int argc, char *argv[]){
 			case 14:
 				printNice("Enter the name of the file you want to import the blockchain from, e.g. `blockchain.txt`");
 				std::cin >> filename;
-				importBlockchain(filename, importedChain, bchain);
+				// importBlockchain(filename, importedChain, bchain);
+				importBlockchain(filename, importedChain);
 				break;
 			case 15:
 				importedChain.printChain();
