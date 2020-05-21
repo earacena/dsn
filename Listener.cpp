@@ -498,7 +498,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         for (std::string &line : blockchain)
           log_file_ << line;
 
-        std::ofstream blockchain_file("./blockchain.txt");
+        std::ofstream blockchain_file("./importedblockchain.txt");
         for (std::string &line : blockchain)
           blockchain_file << line;
 
@@ -507,6 +507,16 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         log_file_ << "[Listener] Blockcahin stored (\"./blockchain.txt\")."
                   << std::endl;
       }
+
+      // Check blockchain validity
+      log_file_ << "[Listener] Importing and checking imported blockchain "
+		<< "validity ...." << std::endl;
+				
+      Blockchain importedBlockchain, initialBlockchain;
+      
+      importBlockchain("./importedblockchain.txt", importedBlockchain, initialBlockchain);
+
+      log_file_ << "[Listener] Done verifying imported blockchain. " << std::endl;
 
       break;
     }
