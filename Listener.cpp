@@ -6,6 +6,8 @@
 
 #include "Listener.hpp"
 
+void importChain(const std::string file);
+
 Listener::Listener() {}
 
 Listener::Listener(const int server_port) {
@@ -19,8 +21,8 @@ Listener::~Listener() { log_file_.close(); }
 
 bool valid_reply_form(const std::string &response) {
   // >..._
-  std::cout << "[Listenter]\nfirst: " << response.substr(0, 1) << "." << std::endl;
-  std::cout << "second:" << response.substr(response.length() - 1, 1) << "."
+  //std::cout << "[Listenter]\nfirst: " << response.substr(0, 1) << "." << std::endl;
+  //std::cout << "second:" << response.substr(response.length() - 1, 1) << "."
             << std::endl;
   return (response.substr(0, 1) == ">" &&
           response.substr(response.length() - 1, 1) == "_");
@@ -36,8 +38,8 @@ bool valid_transmit_form(const std::string &response) {
   if (response == ">badblock_")
     return false;
 
-  std::cout << "[Listener] first: " << response.substr(0, 1) << "." << std::endl;
-  std::cout << "[Listener] second: " << response.substr(response.length() - 1, 1)
+  //std::cout << "[Listener] first: " << response.substr(0, 1) << "." << std::endl;
+  //std::cout << "[Listener] second: " << response.substr(response.length() - 1, 1)
             << "." << std::endl;
 
   bool one_chunk = (response.substr(0, 1) == ">" &&
@@ -49,7 +51,7 @@ bool valid_transmit_form(const std::string &response) {
   bool last_chunk = (response.substr(0, 1) == "&" &&
                      response.substr(response.size() - 1, 1) == "_");
 
-  std::cout << "[Listener] transmit form [" << response << "]: "
+  //std::cout << "[Listener] transmit form [" << response << "]: "
             << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good"
                                                                     : "bad")
             << std::endl;
@@ -467,17 +469,17 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           blockchain.push_back(line + '\n');
         }
 
-        log_file_ << "[Listener] Blockchain: \n";
+        log_file_ << "[Listener] Imported blockchain: \n";
         for (std::string &line : blockchain)
           log_file_ << line;
 
-        std::ofstream blockchain_file("./blockchain.txt");
+        std::ofstream blockchain_file("./importedblockchain.txt");
         for (std::string &line : blockchain)
           blockchain_file << line;
 
         blockchain_file.close();
 
-        log_file_ << "[Listener] Blockchain stored (\"./blockchain.txt\")."
+        log_file_ << "[Listener] Imported blockchain stored (\"./importedblockchain.txt\")."
                   << std::endl;
 
       } else {
@@ -494,7 +496,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           blockchain.push_back(line + '\n');
         }
 
-        log_file_ << "[Listener] Blockchain: \n";
+        log_file_ << "[Listener] Imported blockchain: \n";
         for (std::string &line : blockchain)
           log_file_ << line;
 
@@ -504,7 +506,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
         blockchain_file.close();
 
-        log_file_ << "[Listener] Blockcahin stored (\"./blockchain.txt\")."
+        log_file_ << "[Listener] Imported blockcahin stored (\"./importedblockchain.txt\")."
                   << std::endl;
       }
 
@@ -512,9 +514,8 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
       log_file_ << "[Listener] Importing and checking imported blockchain "
 		<< "validity ...." << std::endl;
 				
-      Blockchain importedBlockchain, initialBlockchain;
       
-      importBlockchain("./importedblockchain.txt", importedBlockchain, initialBlockchain);
+      importChain("importedblockchain.txt");
 
       log_file_ << "[Listener] Done verifying imported blockchain. " << std::endl;
 

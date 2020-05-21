@@ -5,7 +5,7 @@
 #include <vector> // Blockchain = vector of 'BLOCKS'
 #include <fstream> // for importing blockchain
 #include <sstream>
-#include "blocks.hpp" // 'BLOCKS' class
+#include "./blocks.hpp" // 'BLOCKS' class
 
 // class Block;
 class Blockchain {
