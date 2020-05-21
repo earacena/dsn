@@ -131,7 +131,7 @@ void Requester::run(const Request & request) {
       send(sock, block.c_str(), strlen(block.c_str()), 0);
     }
 
-    std::cout << "[Requester] FAT transmission complete. Exiting..." << std::endl;
+    std::cout << "[Requester] FAT transmission complete." << std::endl;
  
   } else if (request.type == "nodes_distrib") {
     std::cout << "\n[Requester] Distributing nodes.txt to node (" 
@@ -185,7 +185,60 @@ void Requester::run(const Request & request) {
       
     }
     std::cout << "[Requester] Nodes (nodes.txt) transmission complete. " << std::endl;
+	
+  } else if (request.type == "blockchain_distrib") {
+    std::cout << "\n[Requester] Distributing blockchain to node (" 
+              << request.target_address << ", " << request.target_port << ")..." << std::endl;
+    std::string data = "";
 
+    for (std::string line : request.blockchain_copy) {
+      data = data + line + '*';
+    }
+ 
+    // std::cout << "[debug] string data: " << data << std::endl;
+
+    // Chunk the data
+    if ((int) data.length()+2 > server_buf_size) {
+      std::vector<std::string> chunks;
+      chunks.reserve(data.size()/server_buf_size-2);
+      size_t chunk_size = server_buf_size-2;
+      for (size_t i = 0; i < data.length(); i += chunk_size) 
+      chunks.push_back(data.substr(i, chunk_size));
+  
+      std::string symbol = "#";
+ 
+      // Conform to reply format
+      for (size_t i = 0; i < chunks.size(); ++i) {
+        if (i == 0)
+          chunks[0] = symbol + chunks[0] + "&";
+        // last element
+        else if (i == chunks.size()-1)
+          chunks[i] = std::string("&") + chunks[i] + "_";
+        else
+          chunks[i] = std::string("&") + chunks[i] + "&";
+      }
+
+      // debug
+      std::cout << "Data: " << data;
+      for (std::string & chunk : chunks)
+        std::cout << "\n\tChunk: " << chunk;
+  
+      std::cout << std::endl;
+   
+
+      // send
+      for (std::string & chunk : chunks) 
+        send(sock, chunk.c_str(), strlen(chunk.c_str()), 0);
+
+    } else {
+      std::string block = std::string("#") + data + "_";
+      block = block.substr(0, server_buf_size);
+      std::cout << "[Requester] Sending data:" << block << std::endl; 
+      send(sock, block.c_str(), strlen(block.c_str()), 0);
+      
+    }
+    std::cout << "[Requester] Blockchain transmission complete. " << std::endl;
+	  
   } else if (request.type == "block_transmit") {
     std::string data = "";
 

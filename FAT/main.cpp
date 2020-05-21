@@ -1,12 +1,14 @@
 #include <iostream>		//couts
 #include <vector>		//data storage
 #include "node.cpp"		//nodes
-#include "block.cpp"	//blocks for createBlock
+// #include "block.cpp"	//blocks for createBlock
 #include <fstream>		//file generation
 #include <iomanip>	    //io manipulation - for inputs
 #include <sstream>		//for importing FAT (iss >> x)
 #include <stdlib.h>		//rand
 #include <map>			//map multi map
+#include "Blockchain/blockchain.hpp"
+// #include "Blockchain/blocks.hpp"
 
 #define RESET 	"\033[0m"
 #define YELLOW 	"\033[33m"
@@ -131,7 +133,7 @@ void exportBlock(std::string fileName, std::string content) {
 }
 
 //populate Fat
-void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName){
+void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName, Blockchain &blockchain){
 	//block shuffling - the order of temp is where the strings in splitStrings will go
 	std::vector<int> temp;
 	int counter = 0;
@@ -148,6 +150,15 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 		Block b(fileName, splitStrings[i]);
 		nodes[temp[i]].pushBackBlock(b);
 
+		TransactionData data;
+		data.fileName = fileName;
+		data.content = splitStrings[i];
+		data.receiverNode = temp[i];
+		data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+		data.timestamp = time(&data.timestamp);
+		// adding each transactional data to the blockchain
+		blockchain.addBlock(data); // Data of each transaction
+
 		//file generation (for emmanuel)
 		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
 		exportBlock(newFileName, splitStrings[i]);	//filename, content
@@ -155,6 +166,134 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 
 	splitStrings.clear();
 }
+
+void exportBlockchain(Blockchain Chain){
+	printNice("Exporting Blockchain as blockchain.txt");
+	std::ofstream myfile;
+	myfile.open("blockchain.txt");
+
+	std::vector<Blocks>::iterator it;
+	std::vector<Blocks> blockchain = Chain.getChain();
+
+    for (size_t b = 0; b < blockchain.size(); b++) {
+        Blocks currentBlock = blockchain[b];
+
+        myfile << "\nBlock====================================================================";
+        myfile << "\nIndex: " << currentBlock.getIndex();
+        myfile << "\nHash: " << currentBlock.getHash();
+        myfile << "\nPrevHash: " << currentBlock.getPrevHash();
+        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
+        myfile << "\nFilename: " << currentBlock.getData().fileName;
+        myfile << "\nContent: " << currentBlock.getData().content;
+        myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
+        myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
+        myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
+		myfile << "\nProof: " << currentBlock.getProof();
+        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
+        myfile << "\n";
+    }
+	myfile.close();
+
+}
+std::string storeAfterSpace(std::string line) { // IMPORT BLOCKCHAIN HELPER
+	bool canStore = false;
+	std::string toStore = "";
+	for (char ch : line) {
+		if(canStore) {
+			toStore += ch;
+		}
+		if (isblank(ch)) {
+			canStore = true;
+		}
+	}
+	return toStore;
+}
+void importBlockchain(std::string file, Blockchain &importedChain) {
+	printNice("Importing Blockchain from file");
+	std::ifstream myfile;
+	std::string line;
+
+	myfile.open(file);
+	if (myfile) {
+		while (getline(myfile, line)) { //empty line
+			int index, receiverNode;
+			size_t nodeBlock;
+			time_t timestamp;
+			std::string hash = "", prevHash = "", fileName = "", content = "", proof = "";
+
+			std::string toStore = "";
+			getline(myfile, line); 	// block=======
+			getline(myfile, line);	// Index: (int)
+			// index = std::stoi(storeAfterSpace(line),nullptr,16);
+			// index = std::stoi(toStore);
+			toStore = storeAfterSpace(line);
+			std::istringstream issindex(toStore);
+			for (char c : toStore) {
+				issindex >> index;
+			}
+
+			getline(myfile, line); // Hash: (string)
+			hash = storeAfterSpace(line);
+
+			getline(myfile, line); // PreviousHash: (string)
+			prevHash = storeAfterSpace(line);
+
+			getline(myfile, line); // fileName: (string)
+			fileName = storeAfterSpace(line);
+
+			getline(myfile, line); // content: (string)
+			content = storeAfterSpace(line);
+
+			getline(myfile, line); // receiverNode: (int)
+			toStore = storeAfterSpace(line);
+			std::istringstream issnode(toStore);
+			for (char c : toStore) {
+				issnode >> receiverNode;
+			}
+			// toStore = storeAfterSpace(line);
+			// receiverNode = std::stoi(toStore);
+			// receiverNode = std::stoi(storeAfterSpace(line),nullptr,16);
+			
+			getline(myfile, line); // nodeBlock: (size_t)
+			toStore = storeAfterSpace(line);
+			std::istringstream iss(toStore);
+			for (char c : toStore) {
+				iss >> nodeBlock;
+			}
+
+			getline(myfile, line); // timestamp: (time_t)
+			toStore = storeAfterSpace(line);
+			std::istringstream isstime(toStore);
+			for (char c : toStore) {
+				isstime >> timestamp;
+			}
+
+			getline(myfile, line); // proof: (string)
+			proof = storeAfterSpace(line);
+			
+			TransactionData data;
+			data.fileName = fileName;
+			data.content = content;
+			data.receiverNode = receiverNode;
+			data.nodeBlock = nodeBlock;
+			data.timestamp = timestamp;
+			importedChain.addBlock(data, hash, prevHash, index, proof); // Data of each transaction
+		}
+		if (importedChain.isChainValid()) {
+			printNice("Chain validated, storing at blockchain.txt");
+			exportBlockchain(importedChain);
+		}
+		else {
+			printNice("Invalid imported Blockchain.");
+		}
+		myfile.close();
+	}
+	else {
+		printNice("error opening file");
+		return;
+	}
+}
+
 /*void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string fileName) {	//work in progress
 
 }*/
@@ -220,7 +359,7 @@ void printEverything(std::vector<Node> &nodes) {
 
 int main (int argc, char *argv[]){
 	int userChoice, numFiles;
-	std::string userInput, fileName;
+	std::string userInput, fileName, filename;
 	bool fatIsSetUp = false;
 	std::vector<std::string> splitStrings;
 	std::vector<Node> nodes;
@@ -233,9 +372,15 @@ int main (int argc, char *argv[]){
 	std::vector<std::string> fileContent;
 	populateNameVecWithRandom(fileNames, fileContent);
 
+	// blockchain: @params: difficulty of PoW algorithm. Higher the more difficulty.
+	Blockchain bchain(2);
+	// declare for when we import blockchain:
+	// @params: (difficulty, any number(not used))
+	Blockchain importedChain(2, -1); // currently empty until we import a Blockchain from a file
+
 	while (true)
 	{
-		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File" << RESET << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File\n11: Print Blockchain, 12: Is it a valid Blockchain?, 13: Export Blockchain, 14: Import Blockchain, 15: Print imported Blockchain" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
@@ -270,7 +415,7 @@ int main (int argc, char *argv[]){
 					fileName = fileNames[nameIterator];
 
 					split(splitStrings, userInput, numFiles);
-					createBlocks(nodes, table, splitStrings, fileName);
+					createBlocks(nodes, table, splitStrings, fileName, bchain);
 					nameIterator++;
 				}
 				else {
@@ -331,6 +476,30 @@ int main (int argc, char *argv[]){
 				else {
 					printNice("Please set up the File Allocation Table first");
 				}
+				break;
+			case 11:
+				printNice("Showing Blockchain");
+				bchain.printChain();
+				break;
+			case 12:
+				if (bchain.isChainValid()) {
+					printNice("VALID");
+				}
+				else {
+					printNice("INVALID");
+				}
+				break;
+			case 13:
+				exportBlockchain(bchain);
+				break;
+			case 14:
+				printNice("Enter the name of the file you want to import the blockchain from, e.g. `blockchain.txt`");
+				std::cin >> filename;
+				// importBlockchain(filename, importedChain, bchain);
+				importBlockchain(filename, importedChain);
+				break;
+			case 15:
+				importedChain.printChain();
 				break;
 			default:
 				std::cout << RED << "*****You didn't enter a proper command*****" << RESET << std::endl;

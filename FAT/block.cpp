@@ -18,8 +18,8 @@ class Block{
 };
 
 Block::Block(){ //just here, shouldnt be used
-	this->fileName = "temp";
-	this->data = "bleh";
+	// this->fileName = "temp";
+	// this->data = "bleh";
 }
 
 Block::Block(std::string userInput) {

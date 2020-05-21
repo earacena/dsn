@@ -6,6 +6,8 @@
 
 #include "Listener.hpp"
 
+void importChain(const std::string file);
+
 Listener::Listener() {}
 
 Listener::Listener(const int server_port) {
@@ -19,9 +21,9 @@ Listener::~Listener() { log_file_.close(); }
 
 bool valid_reply_form(const std::string &response) {
   // >..._
-  std::cout << "first: " << response.substr(0, 1) << "." << std::endl;
-  std::cout << "second:" << response.substr(response.length() - 1, 1) << "."
-            << std::endl;
+  //std::cout << "[Listenter]\nfirst: " << response.substr(0, 1) << "." << std::endl;
+  //std::cout << "second:" << response.substr(response.length() - 1, 1) << "."
+            // << std::endl;
   return (response.substr(0, 1) == ">" &&
           response.substr(response.length() - 1, 1) == "_");
 }
@@ -36,9 +38,9 @@ bool valid_transmit_form(const std::string &response) {
   if (response == ">badblock_")
     return false;
 
-  std::cout << "[Client] first: " << response.substr(0, 1) << "." << std::endl;
-  std::cout << "[Client] second: " << response.substr(response.length() - 1, 1)
-            << "." << std::endl;
+  //std::cout << "[Listener] first: " << response.substr(0, 1) << "." << std::endl;
+  //std::cout << "[Listener] second: " << response.substr(response.length() - 1, 1)
+            // << "." << std::endl;
 
   bool one_chunk = (response.substr(0, 1) == ">" &&
                     response.substr(response.size() - 1, 1) == "_");
@@ -49,10 +51,10 @@ bool valid_transmit_form(const std::string &response) {
   bool last_chunk = (response.substr(0, 1) == "&" &&
                      response.substr(response.size() - 1, 1) == "_");
 
-  std::cout << "[Client] transmit form [" << response << "]: "
-            << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good"
-                                                                    : "bad")
-            << std::endl;
+  //std::cout << "[Listener] transmit form [" << response << "]: "
+            // << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good"
+            //                                                         : "bad")
+            // << std::endl;
 
   return (one_chunk || first_chunk || chunk_n || last_chunk);
 }
@@ -61,9 +63,8 @@ void Listener::run() {
 
   log_file_ << "[Listener] Initializing server..." << std::endl;
 
-  int server_fd, sock, value, max_sd, activity;
+  int server_fd;
   struct sockaddr_in address;
-  struct sockaddr_storage remoteaddr;
   int opt = 1;
   int addrlen = sizeof(address);
 
@@ -104,7 +105,7 @@ void Listener::run() {
   std::string response = "";
 
   // Create socket set, monitered using poll call
-  struct pollfd pfds[10];
+  struct pollfd pfds[100];
   int fd_count = 0;
   
   // Add listener socket (server_fd) to set
@@ -189,8 +190,12 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
     // Receiving FAT
     if (response.substr(0, 1) == "^") {
+	  std::vector<std::string> chunks;
+      chunks.reserve(15);
+      
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);
         for (char & ch : server_buf)
           ch = 0;
 
@@ -207,8 +212,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
@@ -242,8 +246,8 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         std::vector<std::string> fat;
         fat.reserve(10);
 
-        response = response.substr(1, response.length() - 2);
-        std::istringstream sstr(response);
+        //response = response.substr(1, response.length() - 2);
+        std::istringstream sstr(data);
         std::string line;
         while (std::getline(sstr, line, '*')) {
           fat.push_back(line + '\n');
@@ -292,8 +296,12 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
 
     // nodes.txt transmission
     if (response.substr(0, 1) == "@") {
+	  std::vector<std::string> chunks;
+      chunks.reserve(15);
+      
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);
         for (char &ch : server_buf)
           ch = 0;
 
@@ -310,8 +318,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
@@ -345,8 +352,8 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         std::vector<std::string> nodes;
         nodes.reserve(10);
 
-        response = response.substr(1, response.length() - 2);
-        std::istringstream sstr(response);
+        //response = response.substr(1, response.length() - 2);
+        std::istringstream sstr(data);
         std::string line;
         while (std::getline(sstr, line, '*')) {
           nodes.push_back(line + '\n');
@@ -396,9 +403,135 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
       break;
     }
 
-    if (response.substr(0, 1) == "%") {
+    // blockchain transmission
+    if (response.substr(0, 1) == "#") {
+	  std::vector<std::string> chunks;
+      chunks.reserve(15);
+
       // Multi-chunk transmission
       if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);  
+		
+        for (char &ch : server_buf)
+          ch = 0;
+
+        int msg_size = recv(sock, server_buf, server_buf_size, 0);
+        response = server_buf;
+        response = response.substr(0, msg_size);
+
+        log_file_ << "[Listener] Message received: " << response << std::endl;
+
+        if (!valid_transmit_form(response)) {
+          log_file_
+              << "[Listener] Invalid reply format. Exiting listening thread..."
+              << std::endl;
+          return;
+        }
+
+
+
+        chunks.push_back(response);
+
+        while ((response.substr(0, 1) == "&" ||
+                response.substr(response.length() - 1, 1) == "&") &&
+               (response.substr(response.length() - 1, 1) != "_")) {
+          for (char &ch : server_buf)
+            ch = 0;
+
+          msg_size = recv(sock, server_buf, server_buf_size, 0);
+          response = server_buf;
+          response = response.substr(0, msg_size);
+
+          log_file_ << "[Listener] Chunk received: " << response << std::endl;
+          chunks.push_back(response);
+        }
+
+        // process chunks, extract data
+        for (std::string &chunk : chunks)
+          chunk = chunk.substr(1, chunk.length() - 2);
+
+        std::string data = "";
+
+        for (std::string &chunk : chunks)
+          data = data + chunk;
+
+        log_file_ << "[Listener] Combined blockchain chunks received: " << data
+                  << std::endl;
+
+        // swap '*' for newlines
+        std::vector<std::string> blockchain;
+        blockchain.reserve(10);
+
+        //response = response.substr(1, response.length() - 2);
+        std::istringstream sstr(data);
+        std::string line = "";
+        while (std::getline(sstr, line, '*')) {
+          blockchain.push_back(line + '\n');
+        }
+
+        log_file_ << "[Listener] Imported blockchain: \n";
+        for (std::string &line : blockchain)
+          log_file_ << line;
+
+        std::ofstream blockchain_file("./importedblockchain.txt");
+        for (std::string &line : blockchain)
+          blockchain_file << line;
+
+        blockchain_file.close();
+
+        log_file_ << "[Listener] Imported blockchain stored (\"./importedblockchain.txt\")."
+                  << std::endl;
+
+      } else {
+
+        // single chunk transmission
+        // swap '*' for newlines
+        std::vector<std::string> blockchain;
+        blockchain.reserve(10);
+
+        response = response.substr(1, response.length() - 2);
+        std::istringstream sstr(response);
+        std::string line;
+        while (std::getline(sstr, line, '*')) {
+          blockchain.push_back(line + '\n');
+        }
+
+        log_file_ << "[Listener] Imported blockchain: \n";
+        for (std::string &line : blockchain)
+          log_file_ << line;
+
+        std::ofstream blockchain_file("./importedblockchain.txt");
+        for (std::string &line : blockchain)
+          blockchain_file << line;
+
+        blockchain_file.close();
+
+        log_file_ << "[Listener] Imported blockcahin stored (\"./importedblockchain.txt\")."
+                  << std::endl;
+      }
+
+      // Check blockchain validity
+      log_file_ << "[Listener] Importing and checking imported blockchain "
+		<< "validity ...." << std::endl;
+				
+      
+      importChain("importedblockchain.txt");
+
+      log_file_ << "[Listener] Done verifying imported blockchain. " << std::endl;
+
+      break;
+    }
+
+
+    if (response.substr(0, 1) == "%") {
+      std::vector<std::string> chunks;
+      chunks.reserve(15);
+      
+
+      // Multi-chunk transmission
+      if (response.substr(response.length() - 1, 1) == "&") {
+		chunks.push_back(response);
+		  
         for (char &ch : server_buf)
           ch = 0;
         int msg_size = recv(sock, server_buf, server_buf_size, 0);
@@ -414,8 +547,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
           return;
         }
 
-        std::vector<std::string> chunks;
-        chunks.reserve(15);
+
 
         chunks.push_back(response);
 
@@ -449,7 +581,7 @@ void Listener::process(char (&server_buf)[100], int server_buf_size, int value, 
         block.reserve(10);
 
         response = response.substr(1, response.length() - 2);
-        std::istringstream sstr(response);
+        std::istringstream sstr(data);
         std::string line;
         while (std::getline(sstr, line, '*')) {
           block.push_back(line + '\n');
