@@ -461,9 +461,6 @@ int main() {
   
   }
 
-
-
-
   listening_thread.join();
   return 0;
 }

@@ -23,7 +23,7 @@ bool valid_reply_form(const std::string &response) {
   // >..._
   //std::cout << "[Listenter]\nfirst: " << response.substr(0, 1) << "." << std::endl;
   //std::cout << "second:" << response.substr(response.length() - 1, 1) << "."
-            << std::endl;
+            // << std::endl;
   return (response.substr(0, 1) == ">" &&
           response.substr(response.length() - 1, 1) == "_");
 }
@@ -40,7 +40,7 @@ bool valid_transmit_form(const std::string &response) {
 
   //std::cout << "[Listener] first: " << response.substr(0, 1) << "." << std::endl;
   //std::cout << "[Listener] second: " << response.substr(response.length() - 1, 1)
-            << "." << std::endl;
+            // << "." << std::endl;
 
   bool one_chunk = (response.substr(0, 1) == ">" &&
                     response.substr(response.size() - 1, 1) == "_");
@@ -52,9 +52,9 @@ bool valid_transmit_form(const std::string &response) {
                      response.substr(response.size() - 1, 1) == "_");
 
   //std::cout << "[Listener] transmit form [" << response << "]: "
-            << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good"
-                                                                    : "bad")
-            << std::endl;
+            // << ((one_chunk || first_chunk || chunk_n || last_chunk) ? "good"
+            //                                                         : "bad")
+            // << std::endl;
 
   return (one_chunk || first_chunk || chunk_n || last_chunk);
 }
