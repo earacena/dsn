@@ -148,7 +148,7 @@ std::string importFile(const std::string& fileName) {	//takes in a file name and
 
 	return output;
 }
-void exportSearchedFile(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string userInput, int numFiles) {	//Doing rn
+void exportSearchedFile(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string userInput, int numFiles, int option) {
 	//getting searched file into a string
 	std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
 	std::string s;
@@ -162,8 +162,16 @@ void exportSearchedFile(std::vector<Node>& nodes, std::multimap<std::string, std
 	for (int i = 0; i < numFiles; i++) {
 		nodeNumber = it->second.first;
 		blockNumber = it->second.second;
-		//std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
-		s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
+		if(option == 1){    //monks delimit 8
+            //s =
+		}
+		else if(option == 2){   //cancer delimit 11
+            //s =
+		}
+		else if(option == 3){   //normal just put it all in
+            s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
+
+		}
 		it++;
 	}
 
@@ -231,6 +239,7 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 	splitStrings.clear();
 }
 
+//blockchain
 void exportBlockchain(Blockchain Chain){
 	printNice("Exporting Blockchain as blockchain.txt");
 	std::ofstream myfile;
@@ -372,7 +381,7 @@ void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<
         it++;
 	}
 
-    //it = table.find(userInput);
+    //it = table.find(userInput);test monks
 	//table.erase(it);
 	table.erase("one");
 }
@@ -588,8 +597,18 @@ int main (int argc, char *argv[]){
 
 					split(splitStrings, inputFileContent, numFiles);   //works
                     createBlocks(nodes, table, splitStrings, userInput, bchain, 16);
-
-					exportSearchedFile(nodes, table, userInput, numFiles);
+                    if(userInput == "train monks.txt" || userInput == "test monks.txt"){
+                        //exportSearchedFile(nodes, table, userInput, numFiles,1);
+                        exportSearchedFile(nodes, table, userInput, numFiles,3);
+                    }
+                    else if(userInput == "val.txt" || userInput == "test.txt" || userInput == "train.txt"){
+                        //exportSearchedFile(nodes, table, userInput, numFiles,2);
+                        exportSearchedFile(nodes, table, userInput, numFiles,3);
+                    }
+                    else{
+                        exportSearchedFile(nodes, table, userInput, numFiles,3);
+                    }
+					//exportSearchedFile(nodes, table, userInput, numFiles);
 					nameIterator2++;
 				}
 				else {
