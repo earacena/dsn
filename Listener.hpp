@@ -27,7 +27,8 @@
 #include <string.h> 
 #include <poll.h>
 
-
+// Blockchain
+#include "./FAT/Blockchain/blockchain.hpp"
 
 class Listener {
 public:
