@@ -141,7 +141,7 @@ std::string importFile(const std::string& fileName) {	//takes in a file name and
 	//getline(myFile, output, std::string::traits_type::to_char_type(std::traits_type::eof()));
 	while (std::getline(myFile, data)) {
 		output += data;
-		output.push_back(" ");
+		output.push_back(' ');
 	}
 
 	return output;
@@ -296,7 +296,7 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 			// toStore = storeAfterSpace(line);
 			// receiverNode = std::stoi(toStore);
 			// receiverNode = std::stoi(storeAfterSpace(line),nullptr,16);
-			
+
 			getline(myfile, line); // nodeBlock: (size_t)
 			toStore = storeAfterSpace(line);
 			std::istringstream iss(toStore);
@@ -313,7 +313,7 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 
 			getline(myfile, line); // proof: (string)
 			proof = storeAfterSpace(line);
-			
+
 			TransactionData data;
 			data.fileName = fileName;
 			data.content = content;
@@ -345,7 +345,7 @@ void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<
 }
 //print
 void printFatContent(std::vector<Node> &nodes){	//prints proper fat
-	if(fatIsSetUp){
+	if(nodes.size() > 0){
 		printNice("Showing File Allocation Table");
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
 			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
@@ -380,10 +380,10 @@ void printSearchedFile(std::vector<Node> &nodes, std::multimap<std::string, std:
         s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
         it++;
     }
-    std::cout << "The combined file " << userInput << " is: " << s << std::endl;
+    std::cout << "The combined content for file: " << userInput << " is: " << s << std::endl;
 }
 void printEverything(std::vector<Node> &nodes) {	//prints FAT AND the contents.
-    if(fatIsSetUp){
+    if(nodes.size() > 0){
 		printNice("Showing File Allocation Table");
 		for(int i=0; i<nodes.size(); i++){	//goes through each node
 			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
@@ -484,7 +484,7 @@ int main (int argc, char *argv[]){
 				nameIterator = 0;
 				nameIterator2 = 0;
 				break;
-			case 8:	//Import FAT	//not working 
+			case 8:	//Import FAT	//not working
 				//std::cout << "Enter file name for import (add extension if applies)" << std::endl;
 				//std::cin >> userInput
 				userInput = "backup.txt";
@@ -550,13 +550,13 @@ int main (int argc, char *argv[]){
 					printNice("Creating a Block from the file");
 
 					userInput = importFile(inputFileNames[nameIterator2]);
-					
+
 					split(splitStrings, userInput, numFiles);
-					exportSearchedFile(nodes, table, userInput, numFiles)
+					exportSearchedFile(nodes, table, userInput, numFiles);
 					nameIterator++;
 				}
 				else {
-					print Nice("Please set up the File Allocation Table first");
+					printNice("Please set up the File Allocation Table first");
 				}
 			default:
 				std::cout << RED << "*****You didn't enter a proper command*****" << RESET << std::endl;
