@@ -66,4 +66,11 @@ CTRL+C
 >> y
 ```
 
+From any active node:
+
+```
+>> fetch
+>> one
+```
+
 This will demonstrate the features currently implemented. CTRL+C to exit any of the nodes.
