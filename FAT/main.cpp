@@ -90,7 +90,6 @@ void split(std::vector<std::string> &vecToPopulate, std::string stringToSplit, i
 }
 
 //importing, exporting, and block generation
-
 void importFat(std::vector<Node> &nodes, std::string fileName){	//not working	//error string filename was declared under as well.
 	printNice("Importing File Allocation Table from file");
 	std::ifstream myFile;
@@ -176,7 +175,7 @@ void exportBlock(std::string fileName, std::string content) {	//exports each ind
 	temp.close();
 }
 //populate Fat
-void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName, Blockchain &blockchain){	//Creates blocks and populates them with the content and file name
+void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName, Blockchain &blockchain, int option){	//Creates blocks and populates them with the content and file name
 	//block shuffling - the order of temp is where the strings in splitStrings will go
 	std::vector<int> temp;
 	int counter = 0;
@@ -186,25 +185,44 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 	}
 	shuffleVector(temp);
 
-	for (int i = 0; i < splitStrings.size(); i++) {
-		//block generation and fat population
-		table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
-		//Block b(fileName);
-		Block b(fileName, splitStrings[i]);
-		nodes[temp[i]].pushBackBlock(b);
+	if(option == 2){
+        for (int i = 0; i < splitStrings.size(); i++) {
+            //block generation and fat population
+            table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
+            //Block b(fileName);
+            Block b(fileName, splitStrings[i]);
+            nodes[temp[i]].pushBackBlock(b);
 
-		TransactionData data;
-		data.fileName = fileName;
-		data.content = splitStrings[i];
-		data.receiverNode = temp[i];
-		data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
-		data.timestamp = time(&data.timestamp);
-		// adding each transactional data to the blockchain
-		blockchain.addBlock(data); // Data of each transaction
+            TransactionData data;
+            data.fileName = fileName;
+            data.content = splitStrings[i];
+            data.receiverNode = temp[i];
+            data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+            data.timestamp = time(&data.timestamp);
+            // adding each transactional data to the blockchain
+            blockchain.addBlock(data); // Data of each transaction
 
-		//file generation (for emmanuel)
-		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
-		exportBlock(newFileName, splitStrings[i]);	//filename, content
+            //file generation (for Emanuel)
+            std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
+            exportBlock(newFileName, splitStrings[i]);	//filename, content
+        }
+	}
+	else if(option == 16)
+        for (int i = 0; i < splitStrings.size(); i++) {
+        //block generation and fat population
+            table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
+            //Block b(fileName);
+            Block b(fileName, splitStrings[i]);
+            nodes[temp[i]].pushBackBlock(b);
+
+            TransactionData data;
+            data.fileName = fileName;
+            data.content = splitStrings[i];
+            data.receiverNode = temp[i];
+            data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+            data.timestamp = time(&data.timestamp);
+            // adding each transactional data to the blockchain
+            blockchain.addBlock(data); // Data of each transaction
 	}
 
 	splitStrings.clear();
@@ -399,7 +417,7 @@ void printEverything(std::vector<Node> &nodes) {	//prints FAT AND the contents.
 
 int main (int argc, char *argv[]){
 	int userChoice, numFiles;
-	std::string userInput, fileName, filename;
+	std::string userInput, fileName, inputFileContent;
 	bool fatIsSetUp = false;
 	std::vector<std::string> splitStrings;
 	std::vector<Node> nodes;
@@ -455,7 +473,7 @@ int main (int argc, char *argv[]){
 					fileName = fileNames[nameIterator];
 
 					split(splitStrings, userInput, numFiles);
-					createBlocks(nodes, table, splitStrings, fileName, bchain);
+					createBlocks(nodes, table, splitStrings, fileName, bchain, 2);
 					nameIterator++;
 				}
 				else {
@@ -535,25 +553,28 @@ int main (int argc, char *argv[]){
 				break;
 			case 14:
 				printNice("Enter the name of the file you want to import the blockchain from, e.g. `blockchain.txt`");
-				std::cin >> filename;
+				std::cin >> fileName;
 				// importBlockchain(filename, importedChain, bchain);
-				importBlockchain(filename, importedChain);
+				importBlockchain(fileName, importedChain);
 				break;
 			case 15:
 				importedChain.printChain();
 				break;
-			case 16:	//Create Block from file
+			case 16:	//Create Block from file    -> gets a "default you didnt enter a proper command but disregard
 				if (fatIsSetUp) {
 					/*std::cout << "Enter the name and extension of the file " << std::endl;
 					std::cin >> userInput;*/
 
 					printNice("Creating a Block from the file");
 
-					userInput = importFile(inputFileNames[nameIterator2]);
+                    userInput = inputFileNames[nameIterator2];
+					inputFileContent = importFile(inputFileNames[nameIterator2]);
 
-					split(splitStrings, userInput, numFiles);
+					split(splitStrings, inputFileContent, numFiles);   //works
+                    createBlocks(nodes, table, splitStrings, userInput, bchain, 16);
+
 					exportSearchedFile(nodes, table, userInput, numFiles);
-					nameIterator++;
+					nameIterator2++;
 				}
 				else {
 					printNice("Please set up the File Allocation Table first");
