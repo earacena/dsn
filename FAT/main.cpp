@@ -188,49 +188,50 @@ void exportBlock(std::string fileName, std::string content) {	//exports each ind
 //populate Fat
 void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName, Blockchain &blockchain, int option){	//Creates blocks and populates them with the content and file name
 	//block shuffling - the order of temp is where the strings in splitStrings will go
-	std::vector<int> temp;
+	/*std::vector<int> temp;
 	int counter = 0;
 	for (int i = 0; i < splitStrings.size(); i++) {
 		temp.push_back(i);
 		counter++;
 	}
-	shuffleVector(temp);
+	shuffleVector(temp);*/
 
 	if(option == 2){
         for (int i = 0; i < splitStrings.size(); i++) {
             //block generation and fat population
-            table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
+            table.insert(std::make_pair(fileName, std::make_pair(i, nodes[i].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
             //Block b(fileName);
             Block b(fileName, splitStrings[i]);
-            nodes[temp[i]].pushBackBlock(b);
+            //nodes[temp[i]].pushBackBlock(b);
+            nodes[i].pushBackBlock(b);
 
             TransactionData data;
             data.fileName = fileName;
             data.content = splitStrings[i];
-            data.receiverNode = temp[i];
-            data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+            data.receiverNode = i;
+            data.nodeBlock = nodes[i].getBlocks().size()-1;
             data.timestamp = time(&data.timestamp);
             // adding each transactional data to the blockchain
             blockchain.addBlock(data); // Data of each transaction
 
             //file generation (for Emanuel)
-            std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
+            std::string newFileName = fileName + "_" + std::to_string(i) + "_" + std::to_string(nodes[i].getBlocks().size()-1);   //filename_nodenumber_blocknumber
             exportBlock(newFileName, splitStrings[i]);	//filename, content
         }
 	}
 	else if(option == 16)
         for (int i = 0; i < splitStrings.size(); i++) {
         //block generation and fat population
-            table.insert(std::make_pair(fileName, std::make_pair(temp[i], nodes[temp[i]].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
+            table.insert(std::make_pair(fileName, std::make_pair(i, nodes[i].getBlocks().size()))); //fileName, pair(nodeNumber, blockNumber)
             //Block b(fileName);
             Block b(fileName, splitStrings[i]);
-            nodes[temp[i]].pushBackBlock(b);
+            nodes[i].pushBackBlock(b);
 
             TransactionData data;
             data.fileName = fileName;
             data.content = splitStrings[i];
-            data.receiverNode = temp[i];
-            data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+            data.receiverNode = i;
+            data.nodeBlock = nodes[i].getBlocks().size()-1;
             data.timestamp = time(&data.timestamp);
             // adding each transactional data to the blockchain
             blockchain.addBlock(data); // Data of each transaction
