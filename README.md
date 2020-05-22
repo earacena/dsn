@@ -53,6 +53,7 @@ cd node1
 >> 3
 >> 11 -> To see the Blockchain
 >> 12 -> Check if the Blockchain is valid (checks proof-of-work, whether the block's hash is valid, and if current block's previous hash equals the previous block's hash)
+>> 13 -> Export blockchain for distribution
 >> 9
 CTRL+C
 ./node
