@@ -13,8 +13,6 @@ class Block{
 		std::string getFileName();
 		void setFileName(std::string fileName);
 
-		//destructor
-		~Block();
 	private:
 		std::string data;
 		std::string fileName;
@@ -49,11 +47,6 @@ std::string Block::getFileName() {
 
 void Block::setFileName(std::string fileName) {
 	this->fileName = fileName;
-}
-
-Block::~Block() {
-	delete[] data;
-	delete[] fileName;
 }
 
 #endif

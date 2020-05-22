@@ -11,7 +11,7 @@ class Fat{
 		//getters and setters
 		std::vector<Node>& getNodes();
 		void setNodes(std::vector<Node> nodes);
-		//~Fat
+
 	private:
 		std::vector<Node> nodes;
 		std::string fileName;	//we dont use this.
@@ -43,11 +43,5 @@ void Fat::setNodes(std::vector<Node> nodes) { //pass in reference to make it fas
 void std::multimap<std::string, std::pair<int, int>> Fat::setTable(std::multimap<std::string, std::pair<int,int>> table) {
 	this->table = table;
 }*/
-
-Fat::~Fat(){
-	nodes.clear();
-	delete[] nodes;
-	delete[] fileName;
-}
 
 #endif

@@ -51,6 +51,9 @@ void populateNameVecWithRandom(std::vector<std::string> &fileNames, std::vector<
 	inputFileNames.clear();
 	inputFileNames.push_back("train monks.txt");
 	inputFileNames.push_back("test monks.txt");
+	inputFileNames.push_back("val.txt");
+	inputFileNames.push_back("test.txt");
+	inputFileNames.push_back("train.txt");
 
 }
 template <class T> void swap(T &a, T &b) {	//Simple template swap
@@ -358,12 +361,20 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string userInput, int numFiles) {	//in progress, create destructors
 	std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
 	int nodeNumber, blockNumber;
-	nodeNumber = it->second.first;
-	blockNumber = it->second.second;
 
 	for (int i = 0; i < numFiles; i++) {
-		nodes[nodeNumber].getBlocks().erase(blockNumber);
+        nodeNumber = it->second.first;
+        blockNumber = it->second.second;
+		//nodes[nodeNumber].getBlocks()[blockNumber].erase();
+		//nodes[nodeNumber].getBlocks().std::vector::erase(blockNumber);
+		nodes[nodeNumber].getBlocks().erase(nodes[nodeNumber].getBlocks().begin() + blockNumber);
+		//table.erase(it);
+        it++;
 	}
+
+    //it = table.find(userInput);
+	//table.erase(it);
+	table.erase("one");
 }
 //print
 void printFatContent(std::vector<Node> &nodes){	//prints proper fat
@@ -395,15 +406,15 @@ void printSearchedFile(std::vector<Node> &nodes, std::multimap<std::string, std:
     std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
     std::string s;
     int nodeNumber, blockNumber;
-    nodeNumber = it->second.first;
-    blockNumber =  it->second.second;
 
     for(int i=0;i<numFiles;i++){
+        nodeNumber = it->second.first;
+        blockNumber =  it->second.second;
         //std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
         s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
         it++;
     }
-    std::cout << "The combined content for file: " << userInput << " is: " << s << std::endl;
+    std::cout << "The combined content for file '" << userInput << "' is: " << s << std::endl;
 }
 void printEverything(std::vector<Node> &nodes) {	//prints FAT AND the contents.
     if(nodes.size() > 0){
@@ -496,8 +507,8 @@ int main (int argc, char *argv[]){
                 break;
 			case 6:	//Delete block
 				printNice("Enter the name of the file you want to delete");
-				std::cin >> userChoice;
-				deleteBlock(nodes, table, userChoice, numFiles);
+				std::cin >> userInput;
+				deleteBlock(nodes, table, userInput, numFiles);
 				break;
 			case 7:	//Clear FAT
 				printNice("Clearing File Allocation Table");
