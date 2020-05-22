@@ -16,11 +16,10 @@
 #define CYAN 	"\033[36m"
 
 //nice functions
-void printNice(std::string print){	//print out UI for user
-	std::cout << YELLOW << "*****" << print << "*****"  << RESET << std::endl;
+void printNice(std::string print) {
+	std::cout << YELLOW << "*****" << print << "*****" << RESET << std::endl;
 }
-void populateNameVecWithRandom(std::vector<std::string> &fileNames, std::vector<std::string> &content, std::vector<std::string> &inputFileNames) {	//populate sample inputs for testing / avoid wasting time.
-	fileNames.clear();
+void populateNameVecWithRandom(std::vector<std::string>& fileNames, std::vector<std::string>& content) {
 	fileNames.push_back("one");
 	fileNames.push_back("two");
 	fileNames.push_back("three");
@@ -34,7 +33,6 @@ void populateNameVecWithRandom(std::vector<std::string> &fileNames, std::vector<
 	fileNames.push_back("eleven");
 	fileNames.push_back("twelve");
 
-	content.clear();
 	content.push_back("We're no strangers to love");
 	content.push_back("You know the rules and so do I");
 	content.push_back("A full commitment's what I'm thinking of");
@@ -47,25 +45,20 @@ void populateNameVecWithRandom(std::vector<std::string> &fileNames, std::vector<
 	content.push_back("Never gonna make you cry");
 	content.push_back("Never gonna say goodbye");
 	content.push_back("Never gonna tell a lie and hurt you");
-
-	inputFileNames.clear();
-	inputFileNames.push_back("train monks.txt");
-	inputFileNames.push_back("test monks.txt");
-
 }
-template <class T> void swap(T &a, T &b) {	//Simple template swap
+template <class T> void swap(T& a, T& b) {	//works
 	T temp = a;
 	a = b;
 	b = temp;
 }
-template <class T> void shuffleVector(std::vector<T> &vecToShuffle) {	//shuffle a vector's contents for file scrambling
+template <class T> void shuffleVector(std::vector<T>& vecToShuffle) {
 	int random;
 	for (int i = 0; i < vecToShuffle.size(); i++) {
 		random = rand() % vecToShuffle.size();	//between 0 and size()-1
 		swap(vecToShuffle[i], vecToShuffle[random]);
 	}
 }
-void split(std::vector<std::string> &vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate (splits a string into x files)
+void split(std::vector<std::string>& vecToPopulate, std::string stringToSplit, int numPieces) {	//Splits stringToSplit into numPieces and puts them into vecToPopulate
 	int length = stringToSplit.length();
 	if (length == 0) {
 		printNice("Nothing to Split");
@@ -88,17 +81,15 @@ void split(std::vector<std::string> &vecToPopulate, std::string stringToSplit, i
 		vecToPopulate.push_back(temp);
 	}
 }
-
-//importing, exporting, and block generation
-
-void importFat(std::vector<Node> &nodes, std::string fileName){	//not working	//error string filename was declared under as well.
+//importing and exporting
+void importFat(std::vector<Node>& nodes, std::string filename) {	//not working
 	printNice("Importing File Allocation Table from file");
 	std::ifstream myFile;
-	std::string line, name;
+	std::string line, fileName;
 	int nodeNumber, blockNumber, counter = 0;
 
 	//node number, filename block filename block filename block
-	myFile.open(fileName);
+	myFile.open(filename);
 	if (myFile) {
 		while (getline(myFile, line)) {
 			std::istringstream iss(line);
@@ -106,8 +97,8 @@ void importFat(std::vector<Node> &nodes, std::string fileName){	//not working	//
 
 			Node temp(nodeNumber);
 			nodes.push_back(temp);
-			while (iss >> blockNumber >> name) {
-				Block b(name);
+			while (iss >> blockNumber >> fileName) {
+				Block b(fileName);
 				nodes[counter].getBlocks().push_back(b);
 			}
 			counter++;
@@ -119,7 +110,7 @@ void importFat(std::vector<Node> &nodes, std::string fileName){	//not working	//
 		return;
 	}
 }
-void exportFat(std::vector<Node> &nodes){	//export contents in the following way: (node number) (file name) (block number) into a single file
+void exportFat(std::vector<Node>& nodes) {
 	printNice("Exporting File Allocation Table as backup.txt");
 	std::ofstream myFile;
 	myFile.open("backup.txt");
@@ -134,49 +125,15 @@ void exportFat(std::vector<Node> &nodes){	//export contents in the following way
 	}
 	myFile.close();
 }
-std::string importFile(const std::string& fileName) {	//takes in a file name and returns the contents in a string
-	std::string output, data;
-	std::ifstream myFile(fileName.c_str());
-
-	//getline(myFile, output, std::string::traits_type::to_char_type(std::traits_type::eof()));
-	while (std::getline(myFile, data)) {
-		output += data;
-		output.push_back(" ");
-	}
-
-	return output;
-}
-void exportSearchedFile(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string userInput, int numFiles) {	//Doing rn
-	//getting searched file into a string
-	std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
-	std::string s;
-	int nodeNumber, blockNumber;
-
-	//output file variables
-	const std::string path = "storage/";
-	std::ofstream temp(path + userInput);
-
-	//populate
-	for (int i = 0; i < numFiles; i++) {
-		nodeNumber = it->second.first;
-		blockNumber = it->second.second;
-		//std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
-		s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
-		it++;
-	}
-
-	temp << s;
-	temp.close();
-}
-
-void exportBlock(std::string fileName, std::string content) {	//exports each individual block for Networking portion
+void exportBlock(std::string fileName, std::string content) {
 	const std::string path = "storage/";
 	std::ofstream temp(path + fileName);
 	temp << content;
 	temp.close();
 }
+
 //populate Fat
-void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::vector<std::string> &splitStrings, std::string fileName, Blockchain &blockchain){	//Creates blocks and populates them with the content and file name
+void createBlocks(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::vector<std::string>& splitStrings, std::string fileName, Blockchain& blockchain) {
 	//block shuffling - the order of temp is where the strings in splitStrings will go
 	std::vector<int> temp;
 	int counter = 0;
@@ -197,20 +154,20 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
 		data.fileName = fileName;
 		data.content = splitStrings[i];
 		data.receiverNode = temp[i];
-		data.nodeBlock = nodes[temp[i]].getBlocks().size()-1;
+		data.nodeBlock = nodes[temp[i]].getBlocks().size() - 1;
 		data.timestamp = time(&data.timestamp);
 		// adding each transactional data to the blockchain
 		blockchain.addBlock(data); // Data of each transaction
 
 		//file generation (for emmanuel)
-		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size()-1);   //filename_nodenumber_blocknumber
+		std::string newFileName = fileName + "_" + std::to_string(temp[i]) + "_" + std::to_string(nodes[temp[i]].getBlocks().size() - 1);   //filename_nodenumber_blocknumber
 		exportBlock(newFileName, splitStrings[i]);	//filename, content
 	}
 
 	splitStrings.clear();
 }
 
-void exportBlockchain(Blockchain Chain){
+void exportBlockchain(Blockchain Chain) {
 	printNice("Exporting Blockchain as blockchain.txt");
 	std::ofstream myfile;
 	myfile.open("blockchain.txt");
@@ -218,23 +175,23 @@ void exportBlockchain(Blockchain Chain){
 	std::vector<Blocks>::iterator it;
 	std::vector<Blocks> blockchain = Chain.getChain();
 
-    for (size_t b = 0; b < blockchain.size(); b++) {
-        Blocks currentBlock = blockchain[b];
+	for (size_t b = 0; b < blockchain.size(); b++) {
+		Blocks currentBlock = blockchain[b];
 
-        myfile << "\nBlock====================================================================";
-        myfile << "\nIndex: " << currentBlock.getIndex();
-        myfile << "\nHash: " << currentBlock.getHash();
-        myfile << "\nPrevHash: " << currentBlock.getPrevHash();
-        // std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
-        myfile << "\nFilename: " << currentBlock.getData().fileName;
-        myfile << "\nContent: " << currentBlock.getData().content;
-        myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
-        myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
-        myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
+		myfile << "\nBlock====================================================================";
+		myfile << "\nIndex: " << currentBlock.getIndex();
+		myfile << "\nHash: " << currentBlock.getHash();
+		myfile << "\nPrevHash: " << currentBlock.getPrevHash();
+		// std::cout << "\nSenderKey: " << currentBlock.data_.senderKey_;
+		myfile << "\nFilename: " << currentBlock.getData().fileName;
+		myfile << "\nContent: " << currentBlock.getData().content;
+		myfile << "\nReceiverNode: " << currentBlock.getData().receiverNode;
+		myfile << "\nNodeBlock: " << currentBlock.getData().nodeBlock;
+		myfile << "\nTimestamp: " << currentBlock.getData().timestamp;
 		myfile << "\nProof: " << currentBlock.getProof();
-        // std::cout << "\nIs block valid? " << currentBlock.isHashValid();
-        myfile << "\n";
-    }
+		// std::cout << "\nIs block valid? " << currentBlock.isHashValid();
+		myfile << "\n";
+	}
 	myfile.close();
 
 }
@@ -242,7 +199,7 @@ std::string storeAfterSpace(std::string line) { // IMPORT BLOCKCHAIN HELPER
 	bool canStore = false;
 	std::string toStore = "";
 	for (char ch : line) {
-		if(canStore) {
+		if (canStore) {
 			toStore += ch;
 		}
 		if (isblank(ch)) {
@@ -251,7 +208,7 @@ std::string storeAfterSpace(std::string line) { // IMPORT BLOCKCHAIN HELPER
 	}
 	return toStore;
 }
-void importBlockchain(std::string file, Blockchain &importedChain) {
+void importBlockchain(std::string file, Blockchain& importedChain) {
 	printNice("Importing Blockchain from file");
 	std::ifstream myfile;
 	std::string line;
@@ -296,7 +253,7 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 			// toStore = storeAfterSpace(line);
 			// receiverNode = std::stoi(toStore);
 			// receiverNode = std::stoi(storeAfterSpace(line),nullptr,16);
-			
+
 			getline(myfile, line); // nodeBlock: (size_t)
 			toStore = storeAfterSpace(line);
 			std::istringstream iss(toStore);
@@ -313,7 +270,7 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 
 			getline(myfile, line); // proof: (string)
 			proof = storeAfterSpace(line);
-			
+
 			TransactionData data;
 			data.fileName = fileName;
 			data.content = content;
@@ -337,6 +294,9 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 	}
 }
 
+/*void createBlocksFromFiles(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string fileName) {	//work in progress
+
+}*/
 void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, int userInput) {	//in progress, create destructors
 	nodes[userInput].getBlocks().clear();
 	for (int i = 0; i < nodes.size(); i++) {
@@ -344,60 +304,60 @@ void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<
 	}
 }
 //print
-void printFatContent(std::vector<Node> &nodes){	//prints proper fat
-	if(fatIsSetUp){
+void printFatContent(std::vector<Node>& nodes) {	//properly working
+	if (nodes.size() > 0) {
 		printNice("Showing File Allocation Table");
-		for(int i=0; i<nodes.size(); i++){	//goes through each node
+		for (int i = 0; i < nodes.size(); i++) {	//goes through each node
 			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
 				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10) << nodes[i].getBlocks()[j].getFileName() << std::endl; //<< " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
 			}
 		}
 	}
-	else{
+	else {
 		printNice("Please set up the File Allocation Table first");
 	}
 }
-void printMap(std::multimap<std::string, std::pair<int, int>> &table) {	//prints table
-    if(!table.empty()){
-        printNice("Showing file table");
-        for (auto i = table.begin(); i != table.end(); i++) {	//prints whole map
-            std::cout << "File name: " << std::left << std::setw(20) << i->first << " is located in Node " << std::setw(5) << i->second.first << " block " << std::setw(5) << i->second.second << std::endl;
-        }
-    }
-    else{
-        printNice("Please set up the File Allocation Table first");
-    }
+void printMap(std::multimap<std::string, std::pair<int, int>>& table) {
+	if (!table.empty()) {
+		printNice("Showing file table");
+		for (auto i = table.begin(); i != table.end(); i++) {	//prints whole map
+			std::cout << "File name: " << std::left << std::setw(20) << i->first << " is located in Node " << std::setw(5) << i->second.first << " block " << std::setw(5) << i->second.second << std::endl;
+		}
+	}
+	else {
+		printNice("Please set up the File Allocation Table first");
+	}
 }
-void printSearchedFile(std::vector<Node> &nodes, std::multimap<std::string, std::pair<int, int>> &table, std::string userInput, int numFiles){	//searches for a file name and puts it in the correct order
-    std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
-    std::string s;
-    int nodeNumber, blockNumber;
-    for(int i=0;i<numFiles;i++){
-        nodeNumber = it->second.first;
-        blockNumber =  it->second.second;
-        //std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
-        s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
-        it++;
-    }
-    std::cout << "The combined file " << userInput << " is: " << s << std::endl;
+void printCombinedFile(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string userInput, int numFiles) {
+	std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
+	std::string s;
+	int nodeNumber, blockNumber;
+	for (int i = 0; i < numFiles; i++) {
+		nodeNumber = it->second.first;
+		blockNumber = it->second.second;
+		//std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
+		s += nodes[it->second.first].getBlocks()[it->second.second].getData();
+		it++;
+	}
+	std::cout << "The combined file " << userInput << " is: " << s << std::endl;
 }
-void printEverything(std::vector<Node> &nodes) {	//prints FAT AND the contents.
-    if(fatIsSetUp){
+void printEverything(std::vector<Node>& nodes) {
+	if (nodes.size() > 0) {
 		printNice("Showing File Allocation Table");
-		for(int i=0; i<nodes.size(); i++){	//goes through each node
+		for (int i = 0; i < nodes.size(); i++) {	//goes through each node
 			std::cout << "Node number " << nodes[i].getNodeNumber() << std::endl;;
 			for (int j = 0; j < nodes[i].getBlocks().size(); j++) {	//goes through each block of that node.
-				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10)  << nodes[i].getBlocks()[j].getFileName() << " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
+				std::cout << std::setw(5) << " " << "File name: " << std::left << std::setw(10) << nodes[i].getBlocks()[j].getFileName() << " content: " << std::left << std::setw(20) << nodes[i].getBlocks()[j].getData() << std::endl;
 			}
 		}
 	}
-	else{
+	else {
 		printNice("Please set up the File Allocation Table first");
 	}
 }
 
-int main (int argc, char *argv[]){
+int main(int argc, char* argv[]) {
 	int userChoice, numFiles;
 	std::string userInput, fileName, filename;
 	bool fatIsSetUp = false;
@@ -405,12 +365,12 @@ int main (int argc, char *argv[]){
 	std::vector<Node> nodes;
 	std::multimap<std::string, std::pair<int, int>> table;
 
-	//filenames (inputs to avoid cin / cout)
-	int nameIterator = 0;	//iterates every use for case 2
-	int nameIterator2 = 0;	//iterates every use for case 11
-	std::vector<std::string> fileNames, fileContent, inputFileNames;
-	populateNameVecWithRandom(fileNames, fileContent, inputFileNames);
 
+	//filenames
+	int nameIterator = 0;	//iterates every use
+	std::vector<std::string> fileNames;
+	std::vector<std::string> fileContent;
+	populateNameVecWithRandom(fileNames, fileContent);
 
 	// blockchain: @params: difficulty of PoW algorithm. Higher the more difficulty.
 	Blockchain bchain(2);
@@ -420,147 +380,130 @@ int main (int argc, char *argv[]){
 
 	while (true)
 	{
-		std::cout << CYAN << "1: Set up FAT, 2: Create Block, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File, 16: Create Block from File\n11: Print Blockchain, 12: Is it a valid Blockchain?, 13: Export Blockchain, 14: Import Blockchain, 15: Print imported Blockchain" << RESET << std::endl;
+		std::cout << CYAN << "1: Set up FAT, 2: Add file, 3: Print Fat, 4: Print File Names, 5: Print Everything, 6: Delete Block 7: Clear FAT, 8: Import FAT, 9: Export FAT, 10: Search File\n11: Print Blockchain, 12: Is it a valid Blockchain?, 13: Export Blockchain, 14: Import Blockchain, 15: Print imported Blockchain" << RESET << std::endl;
 		std::cout << "Your Input: ";
 		std::cin >> userChoice;
 
 		switch (userChoice)
 		{
-			case 1:	//Set up FAT: set up fat once: makes the nodes and keeps that amount of nodes until deleted.
-				if(fatIsSetUp){
-					printNice("The File Allocation Table is already set up");
-				}
-				else{
-					printNice("Setting up File Allocation Table");
-					/* std::cout << "Enter amount of files: " << std::endl;
-					std::cin >> numFiles;*/
-					numFiles = 3;
+		case 1:	//set up fat once: makes the nodes and keeps that amount of nodes until deleted.
+			if (fatIsSetUp) {
+				printNice("The File Allocation Table is already set up");
+			}
+			else {
+				printNice("Setting up File Allocation Table");
+				/* std::cout << "Enter amount of files: " << std::endl;
+				std::cin >> numFiles;*/
+				numFiles = 3;
 
-					for (int i = 0; i < numFiles; i++) {
-						Node temp(nodes.size());
-						nodes.push_back(temp);
-					}
-					fatIsSetUp = true;
+				for (int i = 0; i < numFiles; i++) {
+					Node temp(nodes.size());
+					nodes.push_back(temp);
 				}
-				break;
-			case 2:	//Create Block: any additional file will be split and added randomly to different nodes that was already set up.
-				if (fatIsSetUp) {	//only adds these blocks if there are nodes to hold them.
-					printNice("Creating a file");
-					/*std::cout << "Enter what to put into the file" << std::endl;
+				fatIsSetUp = true;
+			}
+			break;
+		case 2:	//any additional file will be split and added randomly to different nodes that was already set up.
+			if (fatIsSetUp) {	//only adds these blocks if there are nodes to hold them.
+				printNice("Creating a file");
+				/*std::cout << "Enter what to put into the file" << std::endl;
+				std::cin >> userInput;
+				std::cout << "Enter name for the file" << std::endl;
+				std::cin >> fileName*/
+
+				userInput = fileContent[nameIterator];
+				fileName = fileNames[nameIterator];
+
+				split(splitStrings, userInput, numFiles);
+				createBlocks(nodes, table, splitStrings, fileName, bchain);
+				nameIterator++;
+			}
+			else {
+				printNice("Please set up the File Allocation Table first");
+			}
+			break;
+		case 3:
+			printFatContent(nodes);
+			break;
+		case 4:
+			printMap(table);
+			break;
+		case 5:
+			printEverything(nodes);
+			break;
+		case 6:
+			printNice("Enter the name of the file you want to delete");
+			std::cin >> userChoice;
+			deleteBlock(nodes, table, userChoice);
+			break;
+		case 7:
+			printNice("Clearing File Allocation Table");
+			nodes.clear();
+			table.clear();
+			fatIsSetUp = false;
+			nameIterator = 0;
+			break;
+		case 8:
+			//std::cout << "Enter file name for import (add extension if applies)" << std::endl;
+			//std::cin >> userInput
+			userInput = "backup.txt";
+
+			if (fatIsSetUp) {
+				printNice("You can't import, FAT is already set up");
+			}
+			else {
+				importFat(nodes, userInput);
+				fatIsSetUp = true;
+			}
+			break;
+		case 9:
+			exportFat(nodes);
+			break;
+		case 10:
+			if (nodes.size() > 0) {
+				while (true) {
+					printNice("Enter the name of the file you want to search for, and q to stop");
 					std::cin >> userInput;
-					std::cout << "Enter name for the file" << std::endl;
-					std::cin >> fileName*/
-
-					userInput = fileContent[nameIterator];
-					fileName = fileNames[nameIterator];
-
-					split(splitStrings, userInput, numFiles);
-					createBlocks(nodes, table, splitStrings, fileName, bchain);
-					nameIterator++;
-				}
-				else {
-					printNice("Please set up the File Allocation Table first");
-				}
-				break;
-			case 3:	//Print FAT
-				printFatContent(nodes);
-				break;
-			case 4:	//Print File Names
-				printMap(table);
-				break;
-            case 5:	//Print Everything - for Jay's blockchain code
-				printEverything(nodes);
-                break;
-			case 6:	//Delete block
-				printNice("Enter the name of the file you want to delete");
-				std::cin >> userChoice;
-				deleteBlock(nodes, table, userChoice);
-				break;
-			case 7:	//Clear FAT
-				printNice("Clearing File Allocation Table");
-				nodes.clear();
-				table.clear();
-				fatIsSetUp = false;
-				nameIterator = 0;
-				nameIterator2 = 0;
-				break;
-			case 8:	//Import FAT	//not working 
-				//std::cout << "Enter file name for import (add extension if applies)" << std::endl;
-				//std::cin >> userInput
-				userInput = "backup.txt";
-
-				if(fatIsSetUp){
-					printNice("You can't import, FAT is already set up");
-				}
-				else{
-					importFat(nodes, userInput);
-					fatIsSetUp = true;
-				}
-				break;
-			case 9:	//Export FAT to a single file
-				exportFat(nodes);
-				break;
-			case 10:	//Search for a file name and display it in the correct order
-				if (fatIsSetUp) {
-					while (true) {
-						printNice("Enter the name of the file you want to search for, and q to stop");
-						std::cin >> userInput;
-						if (userInput != "q") {
-							printSearchedFile(nodes, table, userInput, numFiles);
-						}
-						else {
-							printNice("Quitting command");
-							break;
-						}
+					if (userInput != "q") {
+						printCombinedFile(nodes, table, userInput, numFiles);
+					}
+					else {
+						printNice("Quitting command");
+						break;
 					}
 				}
-				else {
-					printNice("Please set up the File Allocation Table first");
-				}
-				break;
-			case 11:
-				printNice("Showing Blockchain");
-				bchain.printChain();
-				break;
-			case 12:
-				if (bchain.isChainValid()) {
-					printNice("VALID");
-				}
-				else {
-					printNice("INVALID");
-				}
-				break;
-			case 13:
-				exportBlockchain(bchain);
-				break;
-			case 14:
-				printNice("Enter the name of the file you want to import the blockchain from, e.g. `blockchain.txt`");
-				std::cin >> filename;
-				// importBlockchain(filename, importedChain, bchain);
-				importBlockchain(filename, importedChain);
-				break;
-			case 15:
-				importedChain.printChain();
-				break;
-			case 16:	//Create Block from file
-				if (fatIsSetUp) {
-					/*std::cout << "Enter the name and extension of the file " << std::endl;
-					std::cin >> userInput;*/
-
-					printNice("Creating a Block from the file");
-
-					userInput = importFile(inputFileNames[nameIterator2]);
-					
-					split(splitStrings, userInput, numFiles);
-					exportSearchedFile(nodes, table, userInput, numFiles)
-					nameIterator++;
-				}
-				else {
-					print Nice("Please set up the File Allocation Table first");
-				}
-			default:
-				std::cout << RED << "*****You didn't enter a proper command*****" << RESET << std::endl;
-				break;
+			}
+			else {
+				printNice("Please set up the File Allocation Table first");
+			}
+			break;
+		case 11:
+			printNice("Showing Blockchain");
+			bchain.printChain();
+			break;
+		case 12:
+			if (bchain.isChainValid()) {
+				printNice("VALID");
+			}
+			else {
+				printNice("INVALID");
+			}
+			break;
+		case 13:
+			exportBlockchain(bchain);
+			break;
+		case 14:
+			printNice("Enter the name of the file you want to import the blockchain from, e.g. `blockchain.txt`");
+			std::cin >> filename;
+			// importBlockchain(filename, importedChain, bchain);
+			importBlockchain(filename, importedChain);
+			break;
+		case 15:
+			importedChain.printChain();
+			break;
+		default:
+			std::cout << RED << "*****You didn't enter a proper command*****" << RESET << std::endl;
+			break;
 		}
 	}
 	return 0;
