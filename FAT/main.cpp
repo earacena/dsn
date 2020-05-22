@@ -355,10 +355,14 @@ void importBlockchain(std::string file, Blockchain &importedChain) {
 	}
 }
 
-void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, int userInput) {	//in progress, create destructors
-	nodes[userInput].getBlocks().clear();
-	for (int i = 0; i < nodes.size(); i++) {
-		//if(nodes[i].getBlocks());
+void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<int, int>>& table, std::string userInput, int numFiles) {	//in progress, create destructors
+	std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
+	int nodeNumber, blockNumber;
+	nodeNumber = it->second.first;
+	blockNumber = it->second.second;
+
+	for (int i = 0; i < numFiles; i++) {
+		nodes[nodeNumber].getBlocks().erase(blockNumber);
 	}
 }
 //print
@@ -391,9 +395,10 @@ void printSearchedFile(std::vector<Node> &nodes, std::multimap<std::string, std:
     std::multimap<std::string, std::pair<int, int>>::iterator it = table.find(userInput);
     std::string s;
     int nodeNumber, blockNumber;
+    nodeNumber = it->second.first;
+    blockNumber =  it->second.second;
+
     for(int i=0;i<numFiles;i++){
-        nodeNumber = it->second.first;
-        blockNumber =  it->second.second;
         //std::cout << "node number: " << nodeNumber << " block number: " << blockNumber << " data: " << nodes[nodeNumber].getBlocks()[blockNumber].getData() << std::endl;
         s += nodes[nodeNumber].getBlocks()[blockNumber].getData();
         it++;
@@ -492,7 +497,7 @@ int main (int argc, char *argv[]){
 			case 6:	//Delete block
 				printNice("Enter the name of the file you want to delete");
 				std::cin >> userChoice;
-				deleteBlock(nodes, table, userChoice);
+				deleteBlock(nodes, table, userChoice, numFiles);
 				break;
 			case 7:	//Clear FAT
 				printNice("Clearing File Allocation Table");

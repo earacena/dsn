@@ -18,6 +18,8 @@ class Node{
 		std::vector<Block>& getBlocks();
 		Fat getFat();
 
+		//destructor
+		~Node;
 	private:
 		int nodeNumber;
 		std::vector<Block> blocks;
@@ -56,5 +58,12 @@ std::vector<Block>& Node::getBlocks() {
 
 Fat Node::getFat() {
 	return fat;
+}
+
+Node::~Node() {
+	delete[] nodeNumber;
+	blocks.clear();
+	delete[] blocks;
+	delete[] fat;
 }
 #endif
