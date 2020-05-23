@@ -235,7 +235,7 @@ void createBlocks(std::vector<Node> &nodes, std::multimap<std::string, std::pair
             data.timestamp = time(&data.timestamp);
             // adding each transactional data to the blockchain
             blockchain.addBlock(data); // Data of each transaction
-	}
+		}
 
 	splitStrings.clear();
 }
@@ -615,6 +615,7 @@ int main (int argc, char *argv[]){
 				else {
 					printNice("Please set up the File Allocation Table first");
 				}
+				break;
 			default:
 				std::cout << RED << "*****You didn't enter a proper command*****" << RESET << std::endl;
 				break;
