@@ -384,7 +384,7 @@ void deleteBlock(std::vector<Node>& nodes, std::multimap<std::string, std::pair<
 
     //it = table.find(userInput);test monks
 	//table.erase(it);
-	table.erase("one");
+	table.erase(userInput);
 }
 //print
 void printFatContent(std::vector<Node> &nodes){	//prints proper fat
