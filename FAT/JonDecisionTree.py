@@ -460,8 +460,8 @@ def ret_accuracy(test, tree):
     return(count/len(test))
 
 
-monks_train = load("monks train.txt")
-monks_test = load("monks test.txt")
+monks_train = load("train monks.txt")
+monks_test = load("test monks.txt")
 tree = build_tree(monks_train)
 depthprune = depth_prune_tree(monks_train, 6)
 print("Base Decision Tree:")
